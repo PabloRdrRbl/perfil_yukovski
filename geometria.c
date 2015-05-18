@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define N 100 // Número de puntos de la circunferencia
+
+
 // PI queda definido como M_PI al importar math.h
 // #define M_PI 3.14159265358979323846
 
@@ -28,117 +31,68 @@ float * linspace(float x0, float x, int n)
 	return(vector);
 }
 
-/* Ecuaciones paramétricas. 
-La función calcula el punto de la circunferencia en función del ángulo */
-float * punto_circunferencia(float centro[], float R, float t)
-{
-	// Punto a devolver
-	float * punto;
-	punto = (float *) malloc(2 * sizeof(float));
-
-
-	// Ecuaciones paramétricas de la circunferencia
-	punto[0] = centro[0] + R * cos(t);
-	punto[1] = centro[1] + R * sin(t);
-
-
-	return(punto);
-}
-
 
 /* Devuelve matriz con todos los puntos de la circunferencia */
-float ** matriz_circunferencia(float centro[], float R, int n)
+float ** matriz_circunferencia(float * centro, float a, float ** puntos_circunferencia)
 {
 	int i;
-	float ** puntos_circunferencia;
-	puntos_circunferencia = (float **) malloc(n * sizeof(float *)); // Reserva de memoria
-																	// Para cada vector
-
-	for (i=0; i < n; i++)
-	{
-		puntos_circunferencia[i] = (float *) malloc(2 * sizeof(float)); // Reserva de memoria
-	}																   // Para las dos coordenadas de cada vector
-
 
 	// Valores de ángulo t para las ecuaciones paramétricas
 	float * valores_t;
-	valores_t = (float *) malloc(n * sizeof(float));
+	float t;
+	valores_t = (float *) malloc(N * sizeof(float));
 
-	valores_t = linspace(0, 2*M_PI, n);
+	valores_t = linspace(0, 2*M_PI, N);
 
 
 	// Cálculo de cada punto para cada valor de t
 	// Almacenamiento en lista
 
-	for (int j = 0; j < n; ++j)
+	for (i = 0; i < N; ++i)
 	{
-		puntos_circunferencia[j] = punto_circunferencia(centro, R, valores_t[j]);
-	}
-	// TODO_p: terminar con el primer punto
-	return(puntos_circunferencia);
-}
-
-
-/* Imprime una lista de puntos (matriz nx2) */
-int imprimir_matriz(float ** circunferencia, int n)
-{
-	int i;
-
-	for (i=0; i < n; i++)
-	{
-		printf("%f %f\n", circunferencia[i][0], circunferencia[i][1]);
+		t = valores_t[i];
+		puntos_circunferencia[i][0] = centro[0] + a * cos(t);
+		puntos_circunferencia[i][1] = centro[1] + a * sin(t);
 	}
 
 	return(0);
 }
 
 
-float transformacion_yukovski_X(float x, float y, float b)
+/* Imprime una lista de puntos (matriz nx2) */
+int imprimir_circunferencia(float ** matriz_nx2)
 {
-	return(x*(1+((pow(b, 2))/(pow(x, 2)*pow(y, 2))))); // Expresión para la transformación
-													   // de las coordenadas X
-}
+	FILE * puntos_circunferencia;
+	puntos_circunferencia = fopen("pts_circun.dat", "w+");
 
-
-float transformacion_yukovski_Y(float x, float y, float b)
-{
-	return(y*(1-((pow(b, 2))/(pow(x, 2)*pow(y, 2))))); // Expresión para la transformación
-													   // de las coordenadas Y
-}
-
-
-float ** transformacion_yukovski(float ** circunferencia, int n, float b)
-{
-	int i; // Control para bucle for
-
-	float ** perfil; // Matriz nx2 que almacenará los puntos transformados
-	perfil = (float **) malloc(n * sizeof(float *));
-
-
-	for (i = 0; i < n; i++)
+	if (puntos_circunferencia == NULL)
 	{
-		perfil[i] = (float *) malloc(2 * sizeof(float)); // Reserva de memoria
-		perfil[i][0] = transformacion_yukovski_X(circunferencia[i][0], circunferencia[i][1], b);
-		perfil[i][1] = transformacion_yukovski_Y(circunferencia[i][0], circunferencia[i][1], b);
+		printf("Error al abrir el archivo\n");
+		return(0);
 	}
 
-	return(perfil);
+	int i;
+
+	for (i=0; i < (N+1); i++)
+	{
+		fprintf(puntos_circunferencia, "%f %f\n", matriz_nx2[i][0], matriz_nx2[i][1]);
+	}
+
+	fprintf(puntos_circunferencia, "%f %f\n", matriz_nx2[0][0], matriz_nx2[0][1]); // Termina con el primer punto
+
+	fclose(puntos_circunferencia);
+
+	return(0);
 }
-
-
-
 
 
 int main()
 {
-    FILE *gp;
-    gp = popen("gnuplot -persist","w"); // gp es el numbre de la tubería
-    if (gp==NULL)
-        {
-        	printf("Error abriendo la tubería hacia GNU Plot.\n");
-            return(0);
-        }
+	int i;
 
+	/**************************/
+	/* ESTOS DATOS LOS RECIBO */
+	/**************************/
 
 	// Coordenadas del centro
 	float * centro;
@@ -147,36 +101,30 @@ int main()
 	centro[0] = -0.3; // Xc
 	centro[1] = 0.2; // Yc
 
-
 	// Radio
-	float R = 1;
-
-
-	// Puntos de la circunferencia
-	int n = 100; // Número de puntos para la circunferencia
-
+	float a = 1;
 
 	// b donde se corta la circunferencia con el eje X
 	float beta; // Ángulo donde y es igual a 0
 	float b; 
 
-	beta = asin(centro[1]/R);
-	b = centro[0] + R * cos(beta);
+	beta = asin(centro[1]/a);
+	b = centro[0] + a * cos(beta);
+
 
 	float ** circunferencia;
-	circunferencia = (float **) malloc(n * sizeof(float *));
+	circunferencia = (float **) malloc(N * sizeof(float *)); // Reserva de memoria
+																	    // Para cada vector
 
-	circunferencia = matriz_circunferencia(centro, R, n);
+	for (i=0; i < N; i++)
+	{
+		circunferencia[i] = (float *) malloc(2 * sizeof(float)); // Reserva de memoria
+	}																   // Para las dos coordenadas de cada vector
 
-	// imprimir_matriz(circunferencia, n);
+	matriz_circunferencia(centro, a, circunferencia);
 
+	imprimir_circunferencia(circunferencia);
 
-	float ** perfil; // Matriz nx2 que almacenará los puntos transformados
-	perfil = (float **) malloc(n * sizeof(float *));
-
-	perfil = transformacion_yukovski(circunferencia, n, b);
-
-	imprimir_matriz(perfil, n);
 
 	return(0);
 }
