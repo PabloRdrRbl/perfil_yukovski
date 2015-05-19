@@ -7,6 +7,7 @@
 /*
 RECIBO: 
 float * dperfil
+
 {centro[0], centro[1], a, beta, b, caso}
 
 
@@ -24,7 +25,6 @@ float * linspace(float x0, float x, int n)
 
 	float *vector; // Vector de salida del espacio
 	vector = (float *) malloc(n * sizeof(float)); // Memomoria reservada para el vector
-												  // TODO_p: free(vector)
 
 	vector[0] = x0; // Valor incial
 	vector[n] = x; // Valor final
@@ -39,10 +39,9 @@ float * linspace(float x0, float x, int n)
 	return(vector);
 }
 
-// TODO_p = meter todo con el vector dperfil
 
 /* Devuelve matriz con todos los puntos de la circunferencia */
-float ** matriz_circunferencia(float * centro, float a, float ** circunferencia)
+float ** matriz_circunferencia(float * dperfil, float a, float ** circunferencia)
 {
 	int i;
 
@@ -60,8 +59,8 @@ float ** matriz_circunferencia(float * centro, float a, float ** circunferencia)
 	for (i = 0; i < N; ++i)
 	{
 		t = valores_t[i];
-		circunferencia[i][0] = centro[0] + a * cos(t);
-		circunferencia[i][1] = centro[1] + a * sin(t);
+		circunferencia[i][0] = dperfil[0] + dperfil[2] * cos(t);
+		circunferencia[i][1] = dperfil[1] + dperfil[2] * sin(t);
 	}
 
 	return(0);
@@ -103,23 +102,12 @@ int main()
 	/**************************/
 	/* ESTOS DATOS LOS RECIBO */
 	/**************************/
+	
+	float * dperfil;
+	dperfil = (float *) malloc(6 * sizeof(float));
 
-	// Coordenadas del centro
-	float * centro;
-	centro = (float *) malloc(2 * sizeof(float));
-
-	centro[0] = -0.3; // Xc
-	centro[1] = 0.2; // Yc
-
-	// Radio
-	float a = 1;
-
-	// b donde se corta la circunferencia con el eje X
-	float beta; // Ángulo donde y es igual a 0
-	float b; 
-
-	beta = asin(centro[1]/a);
-	b = centro[0] + a * cos(beta);
+	// {centro[0], centro[1], a, beta, b, caso}
+	dperfil = {-0.3, 0.2, 1, 0.20135, 1.27975, 4};
 
 
 	float ** circunferencia;
@@ -131,7 +119,7 @@ int main()
 		circunferencia[i] = (float *) malloc(2 * sizeof(float)); // Reserva de memoria
 	}																   // Para las dos coordenadas de cada vector
 
-	matriz_circunferencia(centro, a, circunferencia);
+	matriz_circunferencia(dperfil, circunferencia);
 
 	imprimir_circunferencia(circunferencia);
 
