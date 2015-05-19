@@ -4,6 +4,14 @@
 
 #define N 100 // Número de puntos de la circunferencia
 
+/*
+RECIBO: 
+float * dperfil
+{centro[0], centro[1], a, beta, b, caso}
+
+
+*/
+
 
 // PI queda definido como M_PI al importar math.h
 // #define M_PI 3.14159265358979323846
@@ -31,9 +39,10 @@ float * linspace(float x0, float x, int n)
 	return(vector);
 }
 
+// TODO_p = meter todo con el vector dperfil
 
 /* Devuelve matriz con todos los puntos de la circunferencia */
-float ** matriz_circunferencia(float * centro, float a, float ** puntos_circunferencia)
+float ** matriz_circunferencia(float * centro, float a, float ** circunferencia)
 {
 	int i;
 
@@ -51,8 +60,8 @@ float ** matriz_circunferencia(float * centro, float a, float ** puntos_circunfe
 	for (i = 0; i < N; ++i)
 	{
 		t = valores_t[i];
-		puntos_circunferencia[i][0] = centro[0] + a * cos(t);
-		puntos_circunferencia[i][1] = centro[1] + a * sin(t);
+		circunferencia[i][0] = centro[0] + a * cos(t);
+		circunferencia[i][1] = centro[1] + a * sin(t);
 	}
 
 	return(0);
@@ -60,27 +69,28 @@ float ** matriz_circunferencia(float * centro, float a, float ** puntos_circunfe
 
 
 /* Imprime una lista de puntos (matriz nx2) */
-int imprimir_circunferencia(float ** matriz_nx2)
+int imprimir_circunferencia(float ** circunferencia)
 {
-	FILE * puntos_circunferencia;
-	puntos_circunferencia = fopen("pts_circun.dat", "w+");
+	FILE * file_circunferencia;
+	file_circunferencia = fopen("pts_circun.dat", "w+");
 
-	if (puntos_circunferencia == NULL)
+	if (file_circunferencia == NULL)
 	{
 		printf("Error al abrir el archivo\n");
 		return(0);
+		//TODO_p: a dónde vamos, al menú
 	}
 
 	int i;
 
-	for (i=0; i < (N+1); i++)
+	for (i=0; i < (N); i++)
 	{
-		fprintf(puntos_circunferencia, "%f %f\n", matriz_nx2[i][0], matriz_nx2[i][1]);
+		fprintf(file_circunferencia, "%f %f\n", circunferencia[i][0], circunferencia[i][1]);
 	}
 
-	fprintf(puntos_circunferencia, "%f %f\n", matriz_nx2[0][0], matriz_nx2[0][1]); // Termina con el primer punto
+	fprintf(file_circunferencia, "%f %f\n", circunferencia[0][0], circunferencia[0][1]); // Termina con el primer punto
 
-	fclose(puntos_circunferencia);
+	fclose(file_circunferencia);
 
 	return(0);
 }
