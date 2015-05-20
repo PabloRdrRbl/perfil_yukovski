@@ -41,7 +41,7 @@ float * linspace(float x0, float x, int n)
 
 
 /* Devuelve matriz con todos los puntos de la circunferencia */
-float ** matriz_circunferencia(float * dperfil, float a, float ** circunferencia)
+int matriz_circunferencia(float * dperfil, float ** circunferencia)
 {
 	int i;
 
@@ -94,6 +94,56 @@ int imprimir_circunferencia(float ** circunferencia)
 	return(0);
 }
 
+int tranformacion_yukovski(float * dperfil, float ** circunferencia)
+{
+	int i; // Control para los buvles for
+
+	switch((int) dperfil[5]) // Elección de las ecuaciones de la transformación según el caso particular
+	{
+		case 1:
+		case 2:
+		case 3:
+
+		case 4:
+			for (i = 0; i < N ; i++)
+			{
+				circunferencia[i][0] = circunferencia[i][0] * (1+(pow(dperfil[4],2)/(pow(circunferencia[i][0],2)*pow(circunferencia[i][1],2))));
+				circunferencia[i][1] = circunferencia[i][1] * (1-(pow(dperfil[4],2)/(pow(circunferencia[i][0],2)*pow(circunferencia[i][1],2))));
+			}
+			return(0);
+
+		default:
+			printf("Caso inválido. Introduzca nuevos datos.\n");
+			return(0);
+	}
+}
+
+int imprimir_perfil(float ** circunferencia)
+{
+	FILE * file_perfil;
+	file_perfil = fopen("pts_perfil.dat", "w+");
+
+	if (file_perfil == NULL)
+	{
+		printf("Error al abrir el archivo\n");
+		return(0);
+		//TODO_p: a dónde vamos, al menú
+	}
+
+	int i;
+
+	for (i=0; i < (N); i++)
+	{
+		fprintf(file_perfil, "%f %f\n", circunferencia[i][0], circunferencia[i][1]);
+	}
+
+	fprintf(file_perfil, "%f %f\n", circunferencia[0][0], circunferencia[0][1]); // Termina con el primer punto
+
+	fclose(file_perfil);
+
+	return(0);
+}
+
 
 int main()
 {
@@ -103,11 +153,9 @@ int main()
 	/* ESTOS DATOS LOS RECIBO */
 	/**************************/
 	
-	float * dperfil;
-	dperfil = (float *) malloc(6 * sizeof(float));
 
 	// {centro[0], centro[1], a, beta, b, caso}
-	dperfil = {-0.3, 0.2, 1, 0.20135, 1.27975, 4};
+	float dperfil[6] = {-0.3, 0.2, 1, 0.20135, 1.27975, 4};
 
 
 	float ** circunferencia;
@@ -119,9 +167,14 @@ int main()
 		circunferencia[i] = (float *) malloc(2 * sizeof(float)); // Reserva de memoria
 	}																   // Para las dos coordenadas de cada vector
 
+
 	matriz_circunferencia(dperfil, circunferencia);
 
 	imprimir_circunferencia(circunferencia);
+
+	tranformacion_yukovski(dperfil, circunferencia);
+
+	imprimir_perfil(circunferencia);
 
 
 	return(0);
