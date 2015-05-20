@@ -96,7 +96,8 @@ int imprimir_circunferencia(float ** circunferencia)
 
 int tranformacion_yukovski(float * dperfil, float ** circunferencia)
 {
-	int i; // Control para los buvles for
+	int i; // Control para los bucles for
+	float x, y;
 
 	switch((int) dperfil[5]) // Elección de las ecuaciones de la transformación según el caso particular
 	{
@@ -107,8 +108,10 @@ int tranformacion_yukovski(float * dperfil, float ** circunferencia)
 		case 4:
 			for (i = 0; i < N ; i++)
 			{
-				circunferencia[i][0] = circunferencia[i][0] * (1+(pow(dperfil[4],2)/(pow(circunferencia[i][0],2)*pow(circunferencia[i][1],2))));
-				circunferencia[i][1] = circunferencia[i][1] * (1-(pow(dperfil[4],2)/(pow(circunferencia[i][0],2)*pow(circunferencia[i][1],2))));
+				x = circunferencia[i][0];
+				y = circunferencia[i][1];
+				circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+				circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
 			}
 			return(0);
 
