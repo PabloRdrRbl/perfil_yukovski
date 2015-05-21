@@ -47,7 +47,6 @@ int matriz_circunferencia(float * dperfil, float ** circunferencia)
 
 	// Valores de ángulo t para las ecuaciones paramétricas
 	float * valores_t;
-	float t;
 	valores_t = (float *) malloc(N * sizeof(float));
 
 	valores_t = linspace(0, 2*M_PI, N);
@@ -58,9 +57,8 @@ int matriz_circunferencia(float * dperfil, float ** circunferencia)
 
 	for (i = 0; i < N; ++i)
 	{
-		t = valores_t[i];
-		circunferencia[i][0] = dperfil[0] + dperfil[2] * cos(t);
-		circunferencia[i][1] = dperfil[1] + dperfil[2] * sin(t);
+		circunferencia[i][0] = dperfil[0] + dperfil[2] * cos(valores_t[i]);
+		circunferencia[i][1] = dperfil[1] + dperfil[2] * sin(valores_t[i]);
 	}
 
 	return(0);
@@ -99,22 +97,49 @@ int tranformacion_yukovski(float * dperfil, float ** circunferencia)
 	int i; // Control para los bucles for
 	float x, y;
 
+	float * valores_t;
+	valores_t = (float *) malloc(N * sizeof(float));
+
+	valores_t = linspace(0, 2*M_PI, N);
+
 	switch((int) dperfil[5]) // Elección de las ecuaciones de la transformación según el caso particular
 	{
-		case 1:
-		case 2:
-		case 3:
+			//TODO_p: Comentar qué geometría implica cada caso
 
+		case 1:
+			for (i = 0; i < N; ++i)
+			{
+				circunferencia[i][0] = (dperfil[2]+(pow(dperfil[4],2)/dperfil[2])) * cos(valores_t[i]);
+				circunferencia[i][1] = (dperfil[2]-(pow(dperfil[4],2)/dperfil[2])) * sin(valores_t[i]);
+			}
+			printf("Hola\n");
+			free(valores_t); // Libera la memoria resservada para el vector valores_t
+
+			return(0);
+		case 2:
+
+
+
+		case 3:
+			for (i = 0; i < N ; i++)
+				{
+					x = circunferencia[i][0];
+					y = circunferencia[i][1];
+					circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+					circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+				}
+
+			return(0);
 		case 4:
 			for (i = 0; i < N ; i++)
-			{
-				x = circunferencia[i][0];
-				y = circunferencia[i][1];
-				circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
-				circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
-			}
-			return(0);
+				{
+					x = circunferencia[i][0];
+					y = circunferencia[i][1];
+					circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+					circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+				}
 
+			return(0);
 		default:
 			printf("Caso inválido. Introduzca nuevos datos.\n");
 			return(0);
@@ -158,7 +183,7 @@ int main()
 	
 
 	// {centro[0], centro[1], a, beta, b, caso}
-	float dperfil[6] = {-0.3, 0.2, 1, 0.20135, 1.27975, 4};
+	float dperfil[6] = {0, 0, 1, 0, 1, 1};
 
 
 	float ** circunferencia;
