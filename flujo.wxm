@@ -1,0 +1,173 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 14.12.1 ] */
+
+/* [wxMaxima: section start ]
+CALCULO DE FLUJO A PARTIR DE LA EXPRESIÓN CON PARTE IMAGINARIA
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+numer: true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+DATOS: xc, yc (en vector t0), alpha, beta, U, a(=R), b
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+t0: 0.3+%i*0.2;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+alpha: 0.2617;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+beta: 0.2014;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+U: 1;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+a: 1;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+b: 1.2797;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Calculo de T
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+T:4*%pi*U*a*sin(alpha+beta);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Funcion flujo apuntes aeropython f(t)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f(t):=U*((t-t0)*%e^-(%i*alpha)+(a**2)/(t-t0)*%e**(%i*alpha))+%i*T/(2*%pi)*log(t-t0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Obtenemos la parte imaginaria de f(t) para t=(1+%i*1)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+imagpart(f(-8-%i*3));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+CALCULO DE FLUJO SIN NUMEROS IMAGINARIOS
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Introducimos el centro en coordenadas
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+xc: 0.3;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+yc: 0.2;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Pasamos de la expresion imagpart(f(t)) a la expresion g(p,theta) y a sus correspondencias con las cartesianas x, y
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g(p,theta):= U*(p*sin(theta-alpha)+(a**2)/(p)*sin(alpha-theta))+T/(2*%pi)*log(p);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+p(x,y):= sqrt((x-xc)**2+(y-yc)**2);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+theta(x,y):= atan((y-yc)/(x-xc));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Valoramos las funciones anteriores en (x,y)=(1,1)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g(p(-8,-3),theta(-8,-3));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Comprobacion parte a parte
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Segundo sumando
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+imagpart(%i*T/(2*%pi)*log((-8-3*%i)-t0));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T/(2*%pi)*log(p(-8,-3));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Descomposicion producto de U en dos sumandos
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+imagpart(((-8-3*%i)-t0)*%e^-(%i*alpha));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+p(-8,-3)*sin(theta(-8,-3)-alpha);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+imagpart((a**2)/((-8-3*%i)-t0)*%e**(%i*alpha));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+(a**2)/(p(-8,-3))*sin(alpha-theta(-8,-3));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+!!!!!!!!!!!
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+CONCLUSIONES
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+La transformacion funciona siempre que los valores sean positivos, sino hay considerar posibles casos especiales
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+CASOS ESPECIALES
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+imagpart(((-8-3*%i)-t0)*%e^-(%i*alpha))=p(-8,-3)*sin(theta(-8,-3)-alpha);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+imagpart((a**2)/((-8-3*%i)-t0)*%e**(%i*alpha))=(a**2)/(p(-8,-3))*sin(alpha-theta(-8,-3));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+imagpart(%i*T/(2*%pi)*log((-8-3*%i)-t0))=T/(2*%pi)*log(p(-8,-3));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Comprobamos que en caso de que trabajemos con puntos negativos, hay que invertir el signo de U para que el resultado sea el mismo
+   [wxMaxima: comment end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
