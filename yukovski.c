@@ -12,6 +12,8 @@
 int menu(int control);
 // Con esto evitamos warnings por declaraciones implícitas en funciones que se llaman entre sí
 
+
+
 /*****************/
 /*** FUNCIONES ***/
 /*****************/
@@ -52,11 +54,16 @@ int datos_perfil(float * dperfil)
 	printf("R: ");
 	scanf ("%f", &dperfil[2]);
 
-	dperfil[3] = asin (dperfil[1]/dperfil[2]); // Beta
-	dperfil[4] = dperfil[0] + dperfil[2] * cos (dperfil[3]); // b
-															 // El caso queda definido al pasar el vector por limites
+	// beta
+	dperfil[3] = asin (dperfil[1]/dperfil[2]);
 
-	return(0);
+	// b
+	dperfil[4] = dperfil[0] + dperfil[2] * cos (dperfil[3]);
+															 
+	// El caso queda definido al pasar el vector por limites
+	dperfil[5] = 0; // Por ahora
+
+	return 0;
 }
 
 
