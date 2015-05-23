@@ -397,7 +397,6 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
     	if (circunferencia[i][0]> mayorx)
     	{
    			mayorx = circunferencia[i][0];
-   			printf("%f\n", mayorx);
     	}
     }
 
@@ -408,7 +407,6 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
     	if (fabs(circunferencia[i][1])> mayory)
     	{
    			mayory = fabs(circunferencia[i][1]);
-   			printf("%f\n", mayory);
     	}
     }
 
@@ -778,7 +776,7 @@ int main(int argc, char const *argv[])
 	float * opf; // TODO_j modificar valores iniciales
 	opf = (float *) malloc(5 * sizeof(float));
 
- 	menu(1 , opc, opp, opf);
+ 	menu(0 , opc, opp, opf);
 
   	return 0;
  }
