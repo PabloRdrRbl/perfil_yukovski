@@ -87,7 +87,7 @@ float f2(float x, float y)
 }
 
 
-/*Funcion interpolada para  limites cuando --> x<1 && y>1 */
+/* Funcion interpolada para  limites cuando --> x<1 && y>1 */
 float f3 (float x, float y) 
 {
 	float alim;
@@ -96,7 +96,7 @@ float f3 (float x, float y)
 }
 
 
-/*Funcion interpolada para  limites cuando --> x>1 && y>1 */
+/* Funcion interpolada para  limites cuando --> x>1 && y>1 */
 float f4(float x, float y)
 {
 	float alim;
