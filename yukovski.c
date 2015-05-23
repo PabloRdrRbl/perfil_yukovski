@@ -326,10 +326,43 @@ int transformacion_yukovski(float * dperfil, float ** circunferencia)
 	int i; 
 	float x, y;
 
+	float * valores_t;
+	valores_t = (float *) malloc(N * sizeof(float));
+
+	valores_t = linspace(0, 2*M_PI, N);
+
 	switch((int) dperfil[5]) // Elección de las ecuaciones de la transformación según el caso particular
 	{
+<<<<<<< HEAD:geometria.c
+			//TODO_p: Comentar qué geometría implica cada caso
+
+		case 1:
+			for (i = 0; i < N; ++i)
+			{
+				circunferencia[i][0] = (dperfil[2]+(pow(dperfil[4],2)/dperfil[2])) * cos(valores_t[i]);
+				circunferencia[i][1] = (dperfil[2]-(pow(dperfil[4],2)/dperfil[2])) * sin(valores_t[i]);
+			}
+			printf("Hola\n");
+			free(valores_t); // Libera la memoria resservada para el vector valores_t
+
+			return(0);
+=======
 		case 1: // TODO_p TODO_j ¿Lo demás casos?
+>>>>>>> 6fd99a8fe60520bfa78a027bee90155e26309a33:yukovski.c
 		case 2:
+<<<<<<< HEAD
+
+
+
+		case 3:
+			for (i = 0; i < N ; i++)
+				{
+					x = circunferencia[i][0];
+					y = circunferencia[i][1];
+					circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+					circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+				}
+=======
 		case 3: //El caso 3 funciona tambien con las ecuaciones del caso 4
 			for (i = 0; i < N ; i++)
 			{
@@ -338,17 +371,19 @@ int transformacion_yukovski(float * dperfil, float ** circunferencia)
 				circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
 				circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
 			}
+>>>>>>> 4892419ccf24003de8a53db36531d1b0025bd21a
 
+			return(0);
 		case 4:
 			for (i = 0; i < N ; i++)
-			{
-				x = circunferencia[i][0];
-				y = circunferencia[i][1];
-				circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
-				circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
-			}
-			return(0);
+				{
+					x = circunferencia[i][0];
+					y = circunferencia[i][1];
+					circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+					circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+				}
 
+			return(0);
 		default:
 			printf("Caso inválido. Introduzca nuevos datos.\n");
 			return(0); // TODO_p: ¿dónde vamos?
@@ -655,9 +690,26 @@ int perfil(float * opc, float * opp, float * opf)
 {
 	int i;
 
+<<<<<<< HEAD:geometria.c
+<<<<<<< HEAD
+	/**************************/
+	/* ESTOS DATOS LOS RECIBO */
+	/**************************/
+	
+
+	// {centro[0], centro[1], a, beta, b, caso}
+	float dperfil[6] = {0, 0, 1, 0, 1, 1};
+
+=======
+	float *dperfil; //1:xc 2:yc 3:a 4:beta 5:b 6:caso
+	dperfil = (float *) malloc(6 * sizeof(float)); // Reserva de memoria
+													      // Para cada vector
+>>>>>>> 4892419ccf24003de8a53db36531d1b0025bd21a
+=======
 	// Vector con los datos del perfil {Xc, Yc, a, beta, b, caso}
 	float * dperfil;
 	dperfil = (float *) malloc(6 * sizeof(float)); // Reserva de memoria para el vector
+>>>>>>> 6fd99a8fe60520bfa78a027bee90155e26309a33:yukovski.c
 
 	// Matriz Nx2 que almacenará los puntos de la circunferencia
 	float ** circunferencia;
