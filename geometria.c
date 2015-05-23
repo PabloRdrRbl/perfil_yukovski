@@ -303,6 +303,7 @@ int plotc (float * dperfil, float * opc)
 	pclose (pipec);
 
 	// TODO_j: ¿podemos hacer esa en dos?
+	
 	return 0;
 }
 
