@@ -679,7 +679,7 @@ int perfil(float * opc, float * opp, float * opf)
 	imprimir_circunferencia(circunferencia);
 
 	// Imprime la circunferencia con GNU Plot
-	plotc (dperfil, opc);
+	plotc(dperfil, opc);
 
 	// Aplica la transformación de Yukovski a los puntos de la circunferencia para obener los del perfil
 	transformacion_yukovski(dperfil, circunferencia);
@@ -688,7 +688,7 @@ int perfil(float * opc, float * opp, float * opf)
 	imprimir_perfil(circunferencia);
 
 	// Imprime el perfil con GNU Plot
-	plotp (dperfil, circunferencia, opp);
+	plotp(dperfil, circunferencia, opp);
 
 	return 0;
 }
