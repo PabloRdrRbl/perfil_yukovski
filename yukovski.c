@@ -102,7 +102,7 @@ int limites(float * dperfil)
 	if (dperfil[2] <= 0) // El valor del radio siempre tiene que ser mayor que cero
 	{
 		printf("Valores no válidos (a<=0)\n"); 
-		return 0; // TODO_j: ¿qué pasa si el valor no es válido?
+		return 0; // 
 	}
 
 	if (dperfil[2] < dperfil[1]) // El valor del radio siempre tiene que ser mayor que el alejamiento del eje y
@@ -122,7 +122,7 @@ int limites(float * dperfil)
 	{
 		if (dperfil[2]==dperfil[1])
 		{
-			//printf("Valores válidos (a=yc)\n");
+			//printf("Valores válidos (a=yc)\n"); //TODO_p: como dijo Panizo, si funciona bien no hace falta saberlo
 			dperfil[5]=2;
 			return 1;			
 		}
@@ -137,7 +137,7 @@ int limites(float * dperfil)
 	{
 		if (dperfil[2]>dperfil[0])
 		{
-			//printf("Valores válidos (a>xc)\n"); TODO_j: ¿Este no lo usas?
+			//printf("Valores válidos (a>xc)\n"); 
 			dperfil[5]=3;
 			return 1;
 		}
@@ -164,7 +164,7 @@ int limites(float * dperfil)
 				{
 					if (f1(dperfil[0],dperfil[1])<=dperfil[2])
 					{
-						//printf("Valores válidos (f1(xc,yc)<=a)\n"); TODO_j: ¿Este no lo usas?
+						//printf("Valores válidos (f1(xc,yc)<=a)\n"); 
 						dperfil[5]=4;
 						return 1;
 					}
@@ -178,7 +178,7 @@ int limites(float * dperfil)
 				{
 					if (f3(dperfil[0],dperfil[1])<=dperfil[2])
 					{
-						//printf("Valores válidos (f3(xc,yc)<=a)\n"); TODO_j: ¿Este no lo usas?
+						//printf("Valores válidos (f3(xc,yc)<=a)\n"); 
 						dperfil[5]=4;
 						return 1;
 					}
@@ -195,7 +195,7 @@ int limites(float * dperfil)
 				{
 					if (f2(dperfil[0],dperfil[1])<=dperfil[2])
 					{
-						//printf("Valores válidos (f2(xc,yc)<=a)\n"); TODO_j: ¿Este no lo usas?
+						//printf("Valores válidos (f2(xc,yc)<=a)\n"); 
 						dperfil[5]=4;
 						return 1;
 					}
@@ -209,7 +209,7 @@ int limites(float * dperfil)
  				{
 					if (f4(dperfil[0],dperfil[1])<=dperfil[2] )
 					{
-						//printf("Valores válidos (f4(xc,yc)<=a)\n"); TODO_j: ¿Este no lo usas?
+						//printf("Valores válidos (f4(xc,yc)<=a)\n");
 						dperfil[5]=4;
 						return 1;
 					}
@@ -302,7 +302,7 @@ int plotc(float * dperfil, float * opc)
 
 	// Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipec = popen ("gnuplot -pesist","w"); 
-	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [%f:%f] [%f:%f] \"pts_circun.dat\" pt %.0f ps %.0f lt %.0f, \"pts_circun.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f\n", rangoc[0], rangoc[1], rangoc[2], rangoc[3], opc[0], opc[1], opc[2], opc[3], opc[4]); //TODO_j nombre archivo
+	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [%f:%f] [%f:%f] \"pts_circun.dat\" pt %.0f ps %.0f lt %.0f, \"pts_circun.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f\n", rangoc[0], rangoc[1], rangoc[2], rangoc[3], opc[0], opc[1], opc[2], opc[3], opc[4]);
 	pclose (pipec);
 
 	// TODO_j: ¿podemos hacer esa en dos?
@@ -396,7 +396,7 @@ int perfil()
 	}
 
 	// Opciones para la impresión de la circunferencia con GNU Plot
-	// TODO_j: ¿esto no viene de antes? Ya que lo modificas
+	// TODO_p: ¿esto no viene de antes? Ya que lo modificas - No lo entiendo tio :S
 	float * opc; 
 	opc = (float *) malloc(5 * sizeof(float)); //Reserva de memoria para el vector
 
@@ -410,7 +410,7 @@ int perfil()
 	float * opp;	 // TODO_j modificar valores iniciales
 	opp = (float *) malloc(5 * sizeof(float)); 
 
-	// TODO_j: ¿esto qué es?
+	// TODO_p: son las opciones del plot de circunferencia perfil y flujo
 	float * opf; // TODO_j modificar valores iniciales
 	opf = (float *) malloc(5 * sizeof(float));
 
@@ -418,7 +418,7 @@ int perfil()
 	do
 	{
 		datos_perfil (dperfil);
-	} while (limites(dperfil) != 0); // TODO_j: ¿cómo añade el caso al vector dperfil?
+	} while (limites(dperfil) != 0); // TODO_p: ¿cómo añade el caso al vector dperfil? - A: lo añade cuando comprueba que caso es a la ultima coordenada del vector en cada caso (lineas 126, 141, ...)
 
 	// Calcula los puntos de la circunferencia
 	matriz_circunferencia(dperfil, circunferencia);
