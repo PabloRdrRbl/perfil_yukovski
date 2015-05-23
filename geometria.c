@@ -284,7 +284,7 @@ int plotc (float * dperfil, float * opc)
 	rangoc[0] = dperfil[0] - dperfil[2] - 1; 
 	rangoc[1] = dperfil[0] + dperfil[2] + 1;
 	rangoc[2] = dperfil[1] - dperfil[2] - 1;
-	rangoc 3] = dperfil[1] + dperfil[2] + 1;
+	rangoc[3] = dperfil[1] + dperfil[2] + 1;
 
 	if (rangoc[0]<0 && rangoc[1]<0)
 		rangoc[1]=5;
@@ -299,10 +299,10 @@ int plotc (float * dperfil, float * opc)
 
 	// Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipec = popen ("gnuplot -pesist","w"); 
-	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [%f:%f] [%f:%f] \"pts_circun.dat\" pt %.0f ps %.0f lt %.0f,
-	\"pts_circun.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f\n", rangoc[0], rangoc[1], rangoc[2], rangoc[3], opc[0], opc[1], opc[2], opc[3], opc[4]); //TODO_j nombre archivo
+	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [%f:%f] [%f:%f] \"pts_circun.dat\" pt %.0f ps %.0f lt %.0f, \"pts_circun.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f\n", rangoc[0], rangoc[1], rangoc[2], rangoc[3], opc[0], opc[1], opc[2], opc[3], opc[4]); //TODO_j nombre archivo
 	pclose (pipec);
 
+	// TODO_j: ¿podemos hacer esa en dos?
 	return 0;
 }
 
