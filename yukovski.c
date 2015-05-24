@@ -65,6 +65,15 @@ int datos_perfil(float * dperfil)
 	// El caso queda definido al pasar el vector por limites
 	dperfil[5] = 0; // Por ahora
 
+	//Futuros limites dinamicos del ploteo incializados a cero
+	dperfil[6] = 0; //-X ploteo circunferencia
+	dperfil[7] = 0; //+X ploteo circunferencia
+	dperfil[8] = 0; //-Y ploteo circunferencia
+	dperfil[9] = 0; //+Y ploteo circunferencia
+	dperfil[10] = 0; //-X ploteo perfil
+	dperfil[11] = 0; //+X ploteo perfil
+	dperfil[12] = 0; //-Y ploteo perfil
+	dperfil[13] = 0; //+Y ploteo perfil
 	return 0;
 }
 
@@ -302,32 +311,36 @@ int imprimir_circunferencia(float ** circunferencia)
 /* Plotea los puntos de la circunferencia */
 int plotc(float * dperfil, float * opc)
 {
-	float *rangoc; // Crea rango dinamico
-	rangoc = (float *) malloc(4 * sizeof(float));
+	//Calculo de rango dinamico y asignacion en el vector dperfil
+	dperfil[6] = dperfil[0] - dperfil[2] - 1; 
+	dperfil[7] = dperfil[0] + dperfil[2] + 1;
+	dperfil[8] = dperfil[1] - dperfil[2] - 1;
+	dperfil[9] = dperfil[1] + dperfil[2] + 1;
 
-	rangoc[0] = dperfil[0] - dperfil[2] - 1; 
-	rangoc[1] = dperfil[0] + dperfil[2] + 1;
-	rangoc[2] = dperfil[1] - dperfil[2] - 1;
-	rangoc[3] = dperfil[1] + dperfil[2] + 1;
+	//Modificacion del rango para que se vean los ejes de coordenadas con finalidad didactica
+	float minx, maxx, miny, maxy;
+	minx = dperfil[6];
+	maxx = dperfil[7];
+	miny = dperfil[8];
+	maxy = dperfil[9];
 
-	if (rangoc[0]<0 && rangoc[1]<0)
-		rangoc[1]=5;
-	else if (rangoc[0]>0 && rangoc[1]>0)
-		rangoc[0]=-5;
+	//Si la circunferencia esta en cualquiera de los cuadrantes sin cortar a los ejes, se fuerza que el rango crezca
+	if (minx<0 && maxx<0)
+		maxx=5;
+	else if (minx>0 && maxx>0)
+		minx=-5;
 
-	if (rangoc[2]<0 && rangoc[3]<0)
-		rangoc[3]=5;
-	else if (rangoc[2]>0 && rangoc[3]>0)
-		rangoc[2]=-5;
+	if (miny<0 && maxy<0)
+		maxy=5;
+	else if (miny>0 && maxy>0)
+		miny=-5;
 
 
 	// Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipec = popen ("gnuplot -pesist","w"); 
-	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [%f:%f] [%f:%f] \"pts_circun.dat\" w filledcurves x1 fs pattern %.0f lc %.0f, \"pts_circun.dat\" pt %.0f ps %.0f lt %.0f\n", rangoc[0], rangoc[1], rangoc[2], rangoc[3],  opc[3], opc[4], opc[0], opc[1], opc[2]);
+	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [%f:%f] [%f:%f] \"pts_circun.dat\" w filledcurves x1 fs pattern %.0f lc %.0f, \"pts_circun.dat\" pt %.0f ps %.0f lt %.0f\n", minx, maxx, miny, maxy,  opc[3], opc[4], opc[0], opc[1], opc[2]);
 	pclose (pipec);
 
-	// TODO_j: ¿podemos hacer esa en dos?
-	
 	return 0;
 }
 
@@ -401,7 +414,6 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
    			mayorx = circunferencia[i][0];
     	}
     }
-
     mayorx = mayorx + dperfil[2];
 
 	for (i=0; i<N; i++) // Mayor elemento eje x
@@ -411,7 +423,6 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
    			menorx = circunferencia[i][0];
     	}
     }
-
     menorx = menorx - dperfil[2];
 
 	
@@ -422,7 +433,6 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
    			mayory = circunferencia[i][1];
 	   	}
     }
-
     mayory = mayory + dperfil[2];
 
 	for (i=0; i<N; i++) // Mayor elemento eje y
@@ -432,8 +442,13 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
    			menory = circunferencia[i][1];
     	}
     }
-
     menory = menory - dperfil[2];
+
+    dperfil[10] = menorx;
+    dperfil[11] = mayorx;
+    dperfil[12] = menory;
+    dperfil[13] = mayory;
+
 
     // Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipep = popen ("gnuplot -pesist","w"); 
@@ -675,7 +690,7 @@ int perfil(float * opc, float * opp, float * opf)
 
 	// Vector con los datos del perfil {Xc, Yc, a, beta, b, caso}
 	float * dperfil;
-	dperfil = (float *) malloc(6 * sizeof(float)); // Reserva de memoria para el vector
+	dperfil = (float *) malloc(13 * sizeof(float)); // Reserva de memoria para el vector
 
 	// Matriz Nx2 que almacenará los puntos de la circunferencia
 	float ** circunferencia;
