@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define N 100 // Número de puntos de la circunferencia
+#define N 200 // Número de puntos de la circunferencia
 #define M 50 // Número de puntos de la malla
 
 // PI queda definido como M_PI al importar math.h
@@ -108,26 +108,31 @@ float f4(float x, float y)
 /* Limita el valor de a (radio) para que la transformación sea eficaz */
 int limites(float * dperfil)
 {
+	if (dperfil[0]>50 || dperfil[1]>50 || dperfil[2]>50)
+	{
+		printf("Valores muy grandes \n"); 
+		return 0;
+	}
+
 	if (dperfil[2] <= 0) // El valor del radio siempre tiene que ser mayor que cero
 	{
-		printf("Valores no válidos (a<=0)\n"); 
+		printf("Valores no válidos (R<=0)\n"); 
 		return 0; // 
 	}
 
 	if (dperfil[2] < dperfil[1]) // El valor del radio siempre tiene que ser mayor que el alejamiento del eje y
 	{
-		printf("Valores no válidos (a<yc)\n"); 
+		printf("Valores no válidos (R<Yc)\n"); 
 		return 0;
 	}
 
-	if (dperfil[0]==0 && dperfil[1]==0) // CASO 1: función no implementada - puede tener limites TODO_j
+	if (dperfil[0]==0 && dperfil[1]==0) // CASO 1: no planteado 
 	{
-		printf("Not implemented yet!\n");
-		dperfil[5]=1;
+		printf("Valores no válidos (Xc==0 && Yc==0)\n");
 		return 0;
 	}	
 
-	if (dperfil[0]==0) //CASO 2: considerar formula especial - y sus posibles limites TODO_j
+	if (dperfil[0]==0) //CASO 2
 	{
 		if (dperfil[2]==dperfil[1])
 		{
@@ -137,7 +142,7 @@ int limites(float * dperfil)
 		}
 		else //Si a<xc o a>xc
 		{
-			printf("Valores no válidos (a!=yc)\n"); 
+			printf("Valores no válidos (R!=Yc)\n"); 
 			return 0;
 		}	
 	}
@@ -146,13 +151,20 @@ int limites(float * dperfil)
 	{
 		if (dperfil[2]>dperfil[0])
 		{
-			//printf("Valores válidos (a>xc)\n"); 
-			dperfil[5]=3;
-			return 1;
+			if (dperfil[2]>dperfil[0]+1)
+			{
+				dperfil[5]=3;
+				return 1;
+			}
+			else
+			{
+				printf("Valores no válidos (Xc muy proximo a R)\n"); 
+				return 0;	
+			}
 		}
 		else //Si a==xc o a<xc
 		{
-			printf("Valores no válidos (a=xc || a<xc)\n"); 
+			printf("Valores no válidos (R<=Xc)\n"); 
 			return 0;
 		}
 			
@@ -162,7 +174,7 @@ int limites(float * dperfil)
 	{
 		if (dperfil[0]>6 || dperfil[1]>6) //Limitacion dperfil menos que 6
 		{
-			printf("Valores no válidos (xc>6 || yc>6)\n");
+			printf("Valores no válidos (Xc>6 || Yc>6)\n");
 			return 0;
 		}
 		else
@@ -179,7 +191,7 @@ int limites(float * dperfil)
 					}
 					else
 					{
-						printf("Valores no válidos (f1(xc,yc)>a)\n"); 
+						printf("Valores no válidos (f1(Xc,Yc)>R)\n"); 
 						return 0;
 					}
 				}
@@ -193,7 +205,7 @@ int limites(float * dperfil)
 					}
 					else
 					{
-						printf("Valores no válidos (f3(xc,yc)>a)\n"); 
+						printf("Valores no válidos (f3(Xc,Yc)>R)\n"); 
 						return 0;
 					}
 				}
@@ -210,7 +222,7 @@ int limites(float * dperfil)
 					}
 					else
 					{
-						printf("Valores no válidos (f2(xc,yc)>a)\n"); 
+						printf("Valores no válidos (f2(Xc,Yc)>R)\n"); 
 						return 0;
 					}
 				}
@@ -224,7 +236,7 @@ int limites(float * dperfil)
 					}
 					else
 					{
-						printf("Valores no válidos (f4(xc,yc)>a)\n"); 
+						printf("Valores no válidos (f4(Xc,Yc)>R)\n"); 
 						return 0;
 					}
 				}
@@ -311,7 +323,7 @@ int plotc(float * dperfil, float * opc)
 
 	// Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipec = popen ("gnuplot -pesist","w"); 
-	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [%f:%f] [%f:%f] \"pts_circun.dat\" pt %.0f ps %.0f lt %.0f, \"pts_circun.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f\n", rangoc[0], rangoc[1], rangoc[2], rangoc[3], opc[0], opc[1], opc[2], opc[3], opc[4]);
+	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [%f:%f] [%f:%f] \"pts_circun.dat\" w filledcurves x1 fs pattern %.0f lc %.0f, \"pts_circun.dat\" pt %.0f ps %.0f lt %.0f\n", rangoc[0], rangoc[1], rangoc[2], rangoc[3],  opc[3], opc[4], opc[0], opc[1], opc[2]);
 	pclose (pipec);
 
 	// TODO_j: ¿podemos hacer esa en dos?
@@ -326,33 +338,21 @@ int transformacion_yukovski(float * dperfil, float ** circunferencia)
 	int i; 
 	float x, y;
 
-	switch((int) dperfil[5]) // Elección de las ecuaciones de la transformación según el caso particular
+	if (dperfil[5]==0 && dperfil[5]==1) //Asi eliminamos el caso 1 y si fuera 0 
 	{
-		case 1: // TODO_p TODO_j ¿Lo demás casos?
-		case 2:
-		case 3: //El caso 3 funciona tambien con las ecuaciones del caso 4
-			for (i = 0; i < N ; i++)
-			{
-				x = circunferencia[i][0];
-				y = circunferencia[i][1];
-				circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
-				circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
-			}
-
-		case 4:
-			for (i = 0; i < N ; i++)
-			{
-				x = circunferencia[i][0];
-				y = circunferencia[i][1];
-				circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
-				circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
-			}
-			return(0);
-
-		default:
-			printf("Caso inválido. Introduzca nuevos datos.\n");
-			return(0); // TODO_p: ¿dónde vamos?
+		printf("¿Como has llegado hasta aqui?\n");
+		return(0);
 	}
+
+	for (i = 0; i < N ; i++) //Para el resto de casos funcionan estas ecuaciones 
+	{
+		x = circunferencia[i][0];
+		y = circunferencia[i][1];
+		circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+		circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
+	}
+
+	return(0);
 }
 
 
@@ -390,11 +390,13 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
 {
 	int i;
 	float mayorx = 0.0;
+	float menorx = 0.0;
 	float mayory = 0.0;
-	
-	for (i=0; i<N; i++) // Mayor elemento eje X
+	float menory = 0.0;
+
+	for (i=0; i<N; i++) // Mayor elemento eje x
 	{
-    	if (circunferencia[i][0]> mayorx)
+    	if (circunferencia[i][0] > mayorx)
     	{
    			mayorx = circunferencia[i][0];
     	}
@@ -402,22 +404,40 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
 
     mayorx = mayorx + dperfil[2];
 
+	for (i=0; i<N; i++) // Mayor elemento eje x
+	{
+    	if (circunferencia[i][0] < menorx)
+    	{
+   			menorx = circunferencia[i][0];
+    	}
+    }
+
+    menorx = menorx - dperfil[2];
+
+	
 	for (i=0; i<N; i++) // Mayor elemento eje y
 	{
-    	if (fabs(circunferencia[i][1])> mayory)
+    	if (circunferencia[i][1] > mayory)
     	{
-   			mayory = fabs(circunferencia[i][1]);
-    	}
+   			mayory = circunferencia[i][1];
+	   	}
     }
 
     mayory = mayory + dperfil[2];
 
-	//printf("%0.f - %f - %0.f - %0.f - %0.f\n", opp[0], opp[1], opp[2], opp[3], opp[4]); // TODO_j: ¿Esto se borra o cómo?
+	for (i=0; i<N; i++) // Mayor elemento eje y
+	{
+    	if (circunferencia[i][1] < menory)
+    	{
+   			menory = circunferencia[i][1];
+    	}
+    }
 
+    menory = menory - dperfil[2];
 
     // Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipep = popen ("gnuplot -pesist","w"); 
-	fprintf(pipep, "set size ratio 0.2 \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [-%f:%f] [-%f:%f] \"pts_perfil.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f, \"pts_perfil.dat\" pt %.0f ps %f lt %.0f\n", mayorx, mayorx, mayory, mayory, opp[3], opp[4], opp[0], opp[1], opp[2]); //TODO_j nombre archiv
+	fprintf(pipep, "set size ratio 0.3 \n set nokey \n set xzeroaxis \n set yzeroaxis \n plot [%f:%f] [%f:%f] \"pts_perfil.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f, \"pts_perfil.dat\" pt %.0f ps %f lt %.0f\n", menorx, mayorx, menory, mayory, opp[3], opp[4], opp[0], opp[1], opp[2]); //TODO_j nombre archiv
 	pclose (pipep);
 
 	return 0;
