@@ -728,7 +728,7 @@ int menu(int control, float * opc, float * opp, float * opf)
 		printf("Bienvenido al programa.\nElija la opción que desea ejecutar:\n\n1. Construcción del perfil del ala\n2. Flujo en el perfil del ala\n3. Opciones\n4. Salir\n");
 		printf("\n");
 		printf("\033[32m************************************************************************");
-		printf("\n");	
+		printf("\033[0m\n");	
 	}
 
 	scanf("%d",&numero);
