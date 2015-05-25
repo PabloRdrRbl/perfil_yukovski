@@ -110,25 +110,29 @@ int limites(float * dperfil)
 {
 	if (dperfil[0]>50 || dperfil[1]>50 || dperfil[2]>50)
 	{
-		printf("Valores muy grandes \n"); 
+		printf("\033[31mValores muy grandes \n"); 
+		printf("\033[0m\n");	
 		return 0;
 	}
 
 	if (dperfil[2] <= 0) // El valor del radio siempre tiene que ser mayor que cero
 	{
-		printf("Valores no válidos (R<=0)\n"); 
+		printf("\033[31mValores no válidos (R<=0)\n"); 
+		printf("\033[0m\n");	
 		return 0; // 
 	}
 
 	if (dperfil[2] < dperfil[1]) // El valor del radio siempre tiene que ser mayor que el alejamiento del eje y
 	{
-		printf("Valores no válidos (R<Yc)\n"); 
+		printf("\033[31mValores no válidos (R<Yc)\n"); 
+		printf("\033[0m\n");	
 		return 0;
 	}
 
 	if (dperfil[0]==0 && dperfil[1]==0) // CASO 1: no planteado 
 	{
-		printf("Valores no válidos (Xc==0 && Yc==0)\n");
+		printf("\033[31mValores no válidos (Xc==0 && Yc==0)\n");
+		printf("\033[0m\n");	
 		return 0;
 	}	
 
@@ -142,7 +146,8 @@ int limites(float * dperfil)
 		}
 		else //Si a<xc o a>xc
 		{
-			printf("Valores no válidos (R!=Yc)\n"); 
+			printf("\033[31mValores no válidos (R!=Yc)\n"); 
+			printf("\033[0m\n");	
 			return 0;
 		}	
 	}
@@ -158,13 +163,15 @@ int limites(float * dperfil)
 			}
 			else
 			{
-				printf("Valores no válidos (Xc muy proximo a R)\n"); 
+				printf("\033[31mValores no válidos (Xc muy proximo a R)\n"); 
+				printf("\033[0m\n");	
 				return 0;	
 			}
 		}
 		else //Si a==xc o a<xc
 		{
-			printf("Valores no válidos (R<=Xc)\n"); 
+			printf("\033[31mValores no válidos (R<=Xc)\n"); 
+			printf("\033[0m\n");	
 			return 0;
 		}
 			
@@ -174,7 +181,8 @@ int limites(float * dperfil)
 	{
 		if (dperfil[0]>6 || dperfil[1]>6) //Limitacion dperfil menos que 6
 		{
-			printf("Valores no válidos (Xc>6 || Yc>6)\n");
+			printf("\033[31mValores no válidos (Xc>6 || Yc>6)\n");
+			printf("\033[0m\n");	
 			return 0;
 		}
 		else
@@ -191,7 +199,8 @@ int limites(float * dperfil)
 					}
 					else
 					{
-						printf("Valores no válidos (f1(Xc,Yc)>R)\n"); 
+						printf("\033[31mValores no válidos (f1(Xc,Yc)>R)\n"); 
+						printf("\033[0m\n");	
 						return 0;
 					}
 				}
@@ -205,7 +214,8 @@ int limites(float * dperfil)
 					}
 					else
 					{
-						printf("Valores no válidos (f3(Xc,Yc)>R)\n"); 
+						printf("\033[31mValores no válidos (f3(Xc,Yc)>R)\n"); 
+						printf("\033[0m\n");	
 						return 0;
 					}
 				}
@@ -222,7 +232,8 @@ int limites(float * dperfil)
 					}
 					else
 					{
-						printf("Valores no válidos (f2(Xc,Yc)>R)\n"); 
+						printf("\033[31mValores no válidos (f2(Xc,Yc)>R)\n"); 
+						printf("\033[0m\n");	
 						return 0;
 					}
 				}
@@ -236,7 +247,8 @@ int limites(float * dperfil)
 					}
 					else
 					{
-						printf("Valores no válidos (f4(Xc,Yc)>R)\n"); 
+						printf("\033[31mValores no válidos (f4(Xc,Yc)>R)\n"); 
+						printf("\033[0m\n");	
 						return 0;
 					}
 				}
@@ -279,7 +291,8 @@ int imprimir_circunferencia(float ** circunferencia)
 
 	if (file_circunferencia == NULL)
 	{
-		printf("Error al abrir el archivo\n");
+		printf("\033[31mError al abrir el archivo\n");
+		printf("\033[0m\n");	
 		return(0);
 		//TODO_p: ¿a dónde vamos?, al menú
 	}
@@ -340,7 +353,8 @@ int transformacion_yukovski(float * dperfil, float ** circunferencia)
 
 	if (dperfil[5]==0 && dperfil[5]==1) //Asi eliminamos el caso 1 y si fuera 0 
 	{
-		printf("¿Como has llegado hasta aqui?\n");
+		printf("\033[31m¿Como has llegado hasta aqui?\n");
+		printf("\033[0m\n");	
 		return(0);
 	}
 
@@ -365,7 +379,8 @@ int imprimir_perfil(float ** perfil)
 
 	if (file_perfil == NULL)
 	{
-		printf("Error al abrir el archivo\n");
+		printf("\033[31mError al abrir el archivo\n");
+		printf("\033[0m\n");	
 		return(0);
 		//TODO_p: a dónde vamos, al menú
 	}
@@ -447,26 +462,30 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
 /* Menú para modificar opciones de plot de circunferencia */
 int menu_circ (float * opc, float * opp, float * opf)
 {
-	printf("  1. Tipo de punto \n  2. Tamaño de punto \n  3. Color de punto \n  4. Tipo de malla \n  5. Color de malla\n  6. Salir\n"); // 1: (p)oint(t)ype   2: (p)oint(s)ize   3: (l)ine(t)ype    4:(pattern) malla     5:(l)ine(c)olor malla  
+	printf("\033[33m   1. Tipo de punto \n   2. Tamaño de punto \n   3. Color de punto \n   4. Tipo de malla \n   5. Color de malla\n   6. Salir\n"); // 1: (p)oint(t)ype   2: (p)oint(s)ize   3: (l)ine(t)ype    4:(pattern) malla     5:(l)ine(c)olor malla  
+	printf("\033[0m\n");
 	int opcion, pt, lt, pattern, lc;
 	float ps;
 
 	scanf ("%d", &opcion);
 	while (opcion!=1 && opcion!=2 && opcion!=3 && opcion!=4 && opcion!=5 && opcion!=6) //En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 	{
-		printf("         Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+		printf("\033[31m         Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+		printf("\033[0m\n");
 		scanf("%d", &opcion);
 	}
 
 	switch(opcion)
 	{
 		case 1:
-			printf("(2) Cruz \n(3) Asterisco \n(4) Cuadrado \n(7) Punto\n");
-	
+			printf("\033[33m  (2) Cruz \n  (3) Asterisco \n  (4) Cuadrado \n  (7) Punto\n");	
+			printf("\033[0m\n");
 			scanf ("%d", &pt);
+
 			while (pt!=2 && pt!=3 && pt!=4 && pt!=7) // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("Valor no valido\n"); // TODO_j si no quereis que haga nada - color	
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color	
+				printf("\033[0m\n");
 				scanf("%d", &pt);
 			}
 
@@ -476,21 +495,24 @@ int menu_circ (float * opc, float * opp, float * opf)
 			break;
 
 		case 2:
-			printf("Tamaño del punto: ");
-	
+			printf("\033[33m  Tamaño del punto: ");
+			printf("\033[0m");
 			scanf ("%f", &ps);
+
 			opc[1]=ps;  // Introducimos el valor obtenido en el vector
 
 			menu_circ (opc, opp, opf); // Se vuelve al menu del circulo
 			break;
 
 		case 3:
-			printf("(1) Rojo \n(2) Verde \n(3) Azul \n(7) Negro \n(9) Gris\n");
-	
+			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris\n");
+			printf("\033[0m\n");
 			scanf ("%d", &lt);
+
 			while (lt!=1 && lt!=2 && lt!=3 && lt!=7 && lt!=9)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[0m\n");
 				scanf("%d", &lt);
 			}
 
@@ -500,12 +522,14 @@ int menu_circ (float * opc, float * opp, float * opf)
 			break;
 
 		case 4:
-			printf("(1) Malla 1\n(2) Malla 2 \n(3) Superficie\n");
-	
+			printf("\033[33m  (1) Malla 1\n  (2) Malla 2 \n  (3) Superficie\n");
+			printf("\033[0m\n");
 			scanf ("%d", &pattern);
+
 			while (pattern!=1 && pattern!=2 && pattern!=3)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[0m\n");
 				scanf("%d", &pattern);
 			}
 
@@ -515,12 +539,14 @@ int menu_circ (float * opc, float * opp, float * opf)
 			break;
 
 		case 5:
-			printf("(1) Rojo \n(2) Verde \n(3) Azul \n(7) Negro \n(9) Gris\n");
-	
+			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris\n");
+			printf("\033[0m\n");
 			scanf ("%d", &lc);
+
 			while (lc!=1 && lc!=2 && lc!=3 && lc!=7 && lc!=9)
 			{	
-				printf("Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[0m\n");
 				scanf("%d", &lc);
 			}
 
@@ -541,26 +567,30 @@ int menu_circ (float * opc, float * opp, float * opf)
 /* Menú para modificar opciones de plot del perfil */
 int menu_perfil (float * opc, float * opp, float * opf)
 {
-	printf("  1. Tipo de punto \n  2. Tamaño de punto \n  3. Color de punto \n  4. Tipo de malla \n  5. Color de malla\n  6. Salir\n"); // 1: (p)oint(t)ype   2: (p)oint(s)ize   3: (l)ine(t)ype    4:(pattern) malla     5:(l)ine(c)olor malla  
+	printf("\033[33m  1. Tipo de punto \n  2. Tamaño de punto \n  3. Color de punto \n  4. Tipo de malla \n  5. Color de malla\n  6. Salir\n"); // 1: (p)oint(t)ype   2: (p)oint(s)ize   3: (l)ine(t)ype    4:(pattern) malla     5:(l)ine(c)olor malla  
+	printf("\033[0m\n");
 	int opcion, pt, lt, pattern, lc;
 	float ps;
 
 	scanf ("%d", &opcion);
 	while (opcion!=1 && opcion!=2 && opcion!=3 && opcion!=4 && opcion!=5 && opcion!=6) //En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 	{
-		printf("         Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+		printf("\033[31m         Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+		printf("\033[0m\n");	
 		scanf("%d", &opcion);
 	}
 
 	switch(opcion)
 	{
 		case 1:
-			printf("(2) Cruz \n(3) Asterisco \n(4) Cuadrado \n(7) Punto\n");
-	
+			printf("\033[33m  (2) Cruz \n  (3) Asterisco \n  (4) Cuadrado \n  (7) Punto\n");
+	        printf("\033[0m\n");
 			scanf ("%d", &pt);
+
 			while (pt!=2 && pt!=3 && pt!=4 && pt!=7) // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("Valor no valido\n"); // TODO_j si no quereis que haga nada - color	
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color	
+				printf("\033[0m\n");
 				scanf("%d", &pt);
 			}
 
@@ -570,21 +600,24 @@ int menu_perfil (float * opc, float * opp, float * opf)
 			break;
 
 		case 2:
-			printf("Tamaño del punto: ");
-	
+			printf("\033[33m  Tamaño del punto: ");
+	        printf("\033[0m");
 			scanf ("%f", &ps);
+
 			opp[1]=ps;  // Introducimos el valor obtenido en el vector
 
 			menu_perfil (opc, opp, opf); // Se vuelve al menu del perfil
 			break;
 
 		case 3:
-			printf("(1) Rojo \n(2) Verde \n(3) Azul \n(7) Negro \n(9) Gris\n");
-	
+			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris\n");
+	        printf("\033[0m\n");
 			scanf ("%d", &lt);
+
 			while (lt!=1 && lt!=2 && lt!=3 && lt!=7 && lt!=9)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[0m\n");
 				scanf("%d", &lt);
 			}
 
@@ -594,12 +627,14 @@ int menu_perfil (float * opc, float * opp, float * opf)
 			break;
 
 		case 4:
-			printf("(1) Malla 1\n(2) Malla 2 \n(3) Superficie\n");
-	
+			printf("\033[33m  (1) Malla 1\n  (2) Malla 2 \n  (3) Superficie\n");
+	        printf("\033[0m\n");
 			scanf ("%d", &pattern);
+
 			while (pattern!=1 && pattern!=2 && pattern!=3)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[0m\n");
 				scanf("%d", &pattern);
 			}
 
@@ -609,12 +644,14 @@ int menu_perfil (float * opc, float * opp, float * opf)
 			break;
 
 		case 5:
-			printf("(1) Rojo \n(2) Verde \n(3) Azul \n(7) Negro \n(9) Gris\n");
-	
+			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris\n");
+	        printf("\033[0m\n");
 			scanf ("%d", &lc);
+
 			while (lc!=1 && lc!=2 && lc!=3 && lc!=7 && lc!=9)
 			{	
-				printf("Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[0m\n");
 				scanf("%d", &lc);
 			}
 
@@ -636,7 +673,8 @@ int menu_perfil (float * opc, float * opp, float * opf)
 int menu_opciones (float * opc, float * opp, float * opf)
 {
 	int opcion;
-	printf("1. Opciones del plot de la circunferencia \n2. Opciones del plot del perfil \n3. Opciones del plot del flujo \n4. Salir\n");
+	printf("\033[33m 1. Opciones del plot de la circunferencia \n 2. Opciones del plot del perfil \n 3. Opciones del plot del flujo \n 4. Salir\n");
+	printf("\033[0m\n");
 	scanf ("%d", &opcion);
 
 	while (opcion!=1 && opcion!=2 && opcion!=3 && opcion!=4) //En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
