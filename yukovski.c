@@ -485,7 +485,7 @@ int menu_circ (float * opc, float * opp, float * opf)
 	scanf ("%d", &opcion);
 	while (opcion!=1 && opcion!=2 && opcion!=3 && opcion!=4 && opcion!=5 && opcion!=6) //En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 	{
-		printf("\033[31m         Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+		printf("\033[31m   Valor no valido\n"); // TODO_j si no quereis que haga nada - color
 		printf("\033[0m\n");
 		scanf("%d", &opcion);
 	}
@@ -499,7 +499,7 @@ int menu_circ (float * opc, float * opp, float * opf)
 
 			while (pt!=2 && pt!=3 && pt!=4 && pt!=7) // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color	
+				printf("\033[31m  Valor no valido\n"); // TODO_j si no quereis que haga nada - color	
 				printf("\033[0m\n");
 				scanf("%d", &pt);
 			}
@@ -526,7 +526,7 @@ int menu_circ (float * opc, float * opp, float * opf)
 
 			while (lt!=1 && lt!=2 && lt!=3 && lt!=7 && lt!=9)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31m  Valor no valido\n"); // TODO_j si no quereis que haga nada - color
 				printf("\033[0m\n");
 				scanf("%d", &lt);
 			}
@@ -543,7 +543,7 @@ int menu_circ (float * opc, float * opp, float * opf)
 
 			while (pattern!=1 && pattern!=2 && pattern!=3)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31m  Valor no valido\n"); // TODO_j si no quereis que haga nada - color
 				printf("\033[0m\n");
 				scanf("%d", &pattern);
 			}
@@ -560,7 +560,7 @@ int menu_circ (float * opc, float * opp, float * opf)
 
 			while (lc!=1 && lc!=2 && lc!=3 && lc!=7 && lc!=9)
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31m  Valor no valido\n"); // TODO_j si no quereis que haga nada - color
 				printf("\033[0m\n");
 				scanf("%d", &lc);
 			}
@@ -590,7 +590,7 @@ int menu_perfil (float * opc, float * opp, float * opf)
 	scanf ("%d", &opcion);
 	while (opcion!=1 && opcion!=2 && opcion!=3 && opcion!=4 && opcion!=5 && opcion!=6) //En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 	{
-		printf("\033[31m         Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+		printf("\033[31m  Valor no valido\n"); // TODO_j si no quereis que haga nada - color
 		printf("\033[0m\n");	
 		scanf("%d", &opcion);
 	}
@@ -604,7 +604,7 @@ int menu_perfil (float * opc, float * opp, float * opf)
 
 			while (pt!=2 && pt!=3 && pt!=4 && pt!=7) // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color	
+				printf("\033[31m  Valor no valido\n"); // TODO_j si no quereis que haga nada - color	
 				printf("\033[0m\n");
 				scanf("%d", &pt);
 			}
@@ -631,7 +631,7 @@ int menu_perfil (float * opc, float * opp, float * opf)
 
 			while (lt!=1 && lt!=2 && lt!=3 && lt!=7 && lt!=9)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31m  Valor no valido\n"); // TODO_j si no quereis que haga nada - color
 				printf("\033[0m\n");
 				scanf("%d", &lt);
 			}
@@ -648,7 +648,7 @@ int menu_perfil (float * opc, float * opp, float * opf)
 
 			while (pattern!=1 && pattern!=2 && pattern!=3)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31m  Valor no valido\n"); // TODO_j si no quereis que haga nada - color
 				printf("\033[0m\n");
 				scanf("%d", &pattern);
 			}
@@ -665,7 +665,7 @@ int menu_perfil (float * opc, float * opp, float * opf)
 
 			while (lc!=1 && lc!=2 && lc!=3 && lc!=7 && lc!=9)
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31m  Valor no valido\n"); // TODO_j si no quereis que haga nada - color
 				printf("\033[0m\n");
 				scanf("%d", &lc);
 			}
