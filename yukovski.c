@@ -3,13 +3,13 @@
 #include <math.h>
 
 #define N 200 // Número de puntos de la circunferencia
-#define M 50 // Número de puntos de la malla
+#define M 31 // Número de puntos de la malla
 
 // PI queda definido como M_PI al importar math.h
 // #define M_PI 3.14159265358979323846
 
 /* Declaración de algunos prototipos */
-int menu(int control, float * opc, float * opp, float * opf);
+int menu(int control, float * dperfil, float * opc, float * opp, float * opf);
 int menu_opciones (float * opc, float * opp, float * opf);
 
 // Con esto evitamos warnings por declaraciones implícitas en funciones que se llaman entre sí
@@ -22,25 +22,29 @@ int menu_opciones (float * opc, float * opp, float * opf);
 
 
 /* La función devuelve las n divisiones equiespaciadas del intervalo dado */ 
-float * linspace(float x0, float x, int n)
+int linspace(float * vector, float x0, float x, int n)
 {
 	int i;
 	float parte;
 
-	float *vector; // Vector de salida del espacio
-	vector = (float *) malloc(n * sizeof(float)); // Memoria reservada para el vector
-
 	vector[0] = x0; // Valor incial
 	vector[n] = x; // Valor final
 
-	parte = (x - x0) / (float) n; // Intervalo
+	parte = (x - x0) / (float) (n-1); // Intervalo
 
 	for (i=1; i < n; i++)
 	{
 		vector[i] = vector[i-1] + parte;
 	}
 
-	return(vector);
+	return 0;
+}
+
+
+/* Toma grados y devuelve radianes */
+float deg2rad(float deg)
+{
+	return(deg*2*M_PI/360);
 }
 
 
@@ -57,10 +61,10 @@ int datos_perfil(float * dperfil)
 	scanf ("%f", &dperfil[2]);
 
 	// beta
-	dperfil[3] = asin (dperfil[1]/dperfil[2]);
+	dperfil[3] = asin(dperfil[1]/dperfil[2]);
 
 	// b
-	dperfil[4] = dperfil[0] + dperfil[2] * cos (dperfil[3]);
+	dperfil[4] = dperfil[0] + dperfil[2] * cos(dperfil[3]);
 															 
 	// El caso queda definido al pasar el vector por limites
 	dperfil[5] = 0; // Por ahora
@@ -74,6 +78,7 @@ int datos_perfil(float * dperfil)
 	dperfil[11] = 0; //+X ploteo perfil
 	dperfil[12] = 0; //-Y ploteo perfil
 	dperfil[13] = 0; //+Y ploteo perfil
+
 	return 0;
 }
 
@@ -149,7 +154,7 @@ int limites(float * dperfil)
 	{
 		if (dperfil[2]==dperfil[1])
 		{
-			//printf("Valores válidos (a=yc)\n"); //TODO_p: como dijo Panizo, si funciona bien no hace falta saberlo
+			//printf("Valores válidos (a=yc)\n");
 			dperfil[5]=2;
 			return 1;			
 		}
@@ -276,7 +281,7 @@ int matriz_circunferencia(float * dperfil, float ** circunferencia)
 	float * valores_t;
 	valores_t = (float *) malloc(N * sizeof(float));
 
-	valores_t = linspace(0, 2*M_PI, N); // linspace divide uniformemente el intervalo 2*pi en N partes
+	linspace(valores_t, 0, 2*M_PI, N); // linspace divide uniformemente el intervalo 2*pi en N partes
 
 
 	// Cálculo de cada punto para cada valor de t
@@ -287,7 +292,8 @@ int matriz_circunferencia(float * dperfil, float ** circunferencia)
 		circunferencia[i][1] = dperfil[1] + dperfil[2] * sin(valores_t[i]);
 	}
 
-	return(0);
+
+	return 0;
 }
 
 
@@ -302,8 +308,7 @@ int imprimir_circunferencia(float ** circunferencia)
 	{
 		printf("\033[31mError al abrir el archivo\n");
 		printf("\033[0m\n");	
-		return(0);
-		//TODO_p: ¿a dónde vamos?, al menú
+		return 1;
 	}
 
 	int i;
@@ -317,7 +322,8 @@ int imprimir_circunferencia(float ** circunferencia)
 
 	fclose(file_circunferencia); // Cierre del archivo
 
-	return(0);
+
+	return 0;
 }
 
 
@@ -350,10 +356,13 @@ int plotc(float * dperfil, float * opc)
 
 
 	// Tubería UNIX para usar GNU Plot desde el programa
-	FILE *pipec = popen ("gnuplot -pesist","w"); 
+	FILE *pipec = popen ("gnuplot -pesist","w");
+
 	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n"); 
 	fprintf(pipec, "plot [%f:%f] [%f:%f] \"pts_circun.dat\" w filledcurves x1 fs pattern %.0f lc %.0f, \"pts_circun.dat\" pt %.0f ps %f lt %.0f\n", minx, maxx, miny, maxy,  opc[3], opc[4], opc[0], opc[1], opc[2]);
+
 	pclose (pipec);
+
 
 	return 0;
 }
@@ -365,11 +374,11 @@ int transformacion_yukovski(float * dperfil, float ** circunferencia)
 	int i; 
 	float x, y;
 
-	if (dperfil[5]==0 && dperfil[5]==1) //Asi eliminamos el caso 1 y si fuera 0 
+	if (dperfil[5]==0 || dperfil[5]==1) // Así eliminamos el caso 1 y si fuera 0 
 	{
-		printf("\033[31m¿Como has llegado hasta aqui?\n");
+		printf("\033[31m¿Cómo has llegado hasta aqui?\n");
 		printf("\033[0m\n");	
-		return(0);
+		return 0;
 	}
 
 	for (i = 0; i < N ; i++) //Para el resto de casos funcionan estas ecuaciones 
@@ -380,7 +389,8 @@ int transformacion_yukovski(float * dperfil, float ** circunferencia)
 		circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
 	}
 
-	return(0);
+
+	return 0;
 }
 
 
@@ -395,8 +405,7 @@ int imprimir_perfil(float ** perfil)
 	{
 		printf("\033[31mError al abrir el archivo\n");
 		printf("\033[0m\n");	
-		return(0);
-		//TODO_p: a dónde vamos, al menú
+		return 1;
 	}
 
 	int i;
@@ -410,7 +419,8 @@ int imprimir_perfil(float ** perfil)
 
 	fclose(file_perfil); // Cierre del archivo
 
-	return(0);
+
+	return 0;
 }
 
 
@@ -468,9 +478,12 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
 
     // Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipep = popen ("gnuplot -pesist","w"); 
+
 	fprintf(pipep, "set size ratio 0.3 \n set nokey \n set xzeroaxis \n set yzeroaxis \n");
 	fprintf(pipep, "plot [%f:%f] [%f:%f] \"pts_perfil.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f, \"pts_perfil.dat\" pt %.0f ps %f lt %.0f\n", menorx, mayorx, menory, mayory, opp[3], opp[4], opp[0], opp[1], opp[2]);
+
 	pclose (pipep);
+
 
 	return 0;
 }
@@ -688,6 +701,77 @@ int menu_perfil (float * opc, float * opp, float * opf)
 }
 
 
+/* Menú para modificar opciones de plot del flujo del cilindro */
+int menu_flujo_cil (float * opc, float * opp, float * opfc)
+{
+	printf("\033[33m   1. Color de flujo \n   2. Tamaño de la linea de flujo\n   3. Color del cilindro \n   4. Salir\n"); // 1: (l)ine(c)olor flujo   2: (l)ine(w)idth   3:(l)ine(c)olor cilindro  
+	printf("\033[0m\n");
+	int opcion, lcf, lcc;
+	float lw;
+
+	scanf ("%d", &opcion);
+	while (opcion!=1 && opcion!=2 && opcion!=3 && opcion!=4) //En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
+	{
+		printf("\033[31m         Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+		printf("\033[0m\n");
+		scanf("%d", &opcion);
+	}
+
+	switch(opcion)
+	{
+		case 1:
+			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris\n");
+			printf("\033[0m\n");
+			scanf ("%d", &lcc);
+
+			while (lcc!=1 && lcc!=2 && lcc!=3 && lcc!=7 && lcc!=9)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
+			{	
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[0m\n");
+				scanf("%d", &lcc);
+			}
+
+			opfc[0]= (float) lcc;  // Introducimos el valor obtenido (con su correspondiente casting) en el vector
+
+			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del circulo
+			break;
+
+		case 2:
+			printf("\033[33m  Tamaño de la linea de flujo: ");
+			printf("\033[0m");
+			scanf ("%f", &lw);
+
+			opfc[2]=lw;  // Introducimos el valor obtenido en el vector
+
+			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del circulo
+			break;
+
+		case 3:
+			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris\n");
+			printf("\033[0m\n");
+			scanf ("%d", &lcf);
+
+			while (lcf!=1 && lcf!=2 && lcf!=3 && lcf!=7 && lcf!=9)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
+			{	
+				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[0m\n");
+				scanf("%d", &lcf);
+			}
+
+			opfc[2]= (float) lcf;  // Introducimos el valor obtenido (con su correspondiente casting) en el vector
+
+			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del circulo
+			break;
+
+		/*case 4: TODO_j
+			menu_opciones(opc, opp, opfc); // Se vuelve al menu de opciones
+			break;*/
+	}
+
+	return 0;
+}
+
+
 /* Menu para modificar opciones de plot */ // TODO_j: revisar alineado y tabulacion
 int menu_opciones (float * opc, float * opp, float * opf)
 {
@@ -704,15 +788,15 @@ int menu_opciones (float * opc, float * opp, float * opf)
 	switch(opcion)
 	{
 		case 1:
-			menu_circ (opc, opp, opf); // Menú opciones círculo
+			menu_circ(opc, opp, opf); // Menú opciones círculo
 			break;
 
 		case 2:
-			menu_perfil (opc, opp, opf); // Menú opciones perfil
+			menu_perfil(opc, opp, opf); // Menú opciones perfil
 			break;
 
 		case 3:
-			printf("Flujo\n"); // Menú opciones perfil // TODO_j: esto habría que acabarlo xD
+			menu_flujo_cil(opc, opp, opf); // Menú opciones flujo
 			break;
 
 		case 4:
@@ -723,15 +807,11 @@ int menu_opciones (float * opc, float * opp, float * opf)
 }
 
 
-/* Contruye e imprime el perfil alar con los datos especificados */
+/* Construye e imprime el perfil alar con los datos especificados */
 /* Primero circunferencia, tras la transformación de Yukovski el perfil */
-int perfil(float * opc, float * opp, float * opf)
+int perfil(float * dperfil, float * opc, float * opp, float * opf)
 {
 	int i;
-
-	// Vector con los datos del perfil {Xc, Yc, a, beta, b, caso}
-	float * dperfil;
-	dperfil = (float *) malloc(13 * sizeof(float)); // Reserva de memoria para el vector
 
 	// Matriz Nx2 que almacenará los puntos de la circunferencia
 	float ** circunferencia;
@@ -746,13 +826,14 @@ int perfil(float * opc, float * opp, float * opf)
 	do
 	{
 		datos_perfil (dperfil);
-	} while (limites(dperfil) == 0); // TODO_p: ¿cómo añade el caso al vector dperfil? - A: lo añade cuando comprueba que caso es a la ultima coordenada del vector en cada caso (lineas 126, 141, ...)
+	} while (limites(dperfil) == 0);
 
 	// Calcula los puntos de la circunferencia
 	matriz_circunferencia(dperfil, circunferencia);
 
 	// Guarda los puntos de la circunferencia en el archivo pts_circunferencia.dat
-	imprimir_circunferencia(circunferencia);
+	if (imprimir_circunferencia(circunferencia)) // Si la apertura falla vuelve al menú
+		menu(0, dperfil, opc, opp, opf);
 
 	// Imprime la circunferencia con GNU Plot
 	plotc(dperfil, opc);
@@ -761,20 +842,223 @@ int perfil(float * opc, float * opp, float * opf)
 	transformacion_yukovski(dperfil, circunferencia);
 
 	// Guarda los puntos del perfil en el archivo pts_perfil.dat
-	imprimir_perfil(circunferencia);
+	if (imprimir_perfil(circunferencia)) // Si la apertura falla vuelve al menú
+		menu(0, dperfil, opc, opp, opf);
 
 	// Imprime el perfil con GNU Plot
 	plotp(dperfil, circunferencia, opp);
 
+	
 	return 0;
 }
 
 
 
-/* Contiene el menú principal del programa  llama al resto de las funciones */
-int menu(int control, float * opc, float * opp, float * opf)
+/* Introducción de los datos para el cálculo del flujo */
+int datos_flujo (float *dperfil, float *dflujo)
 {
-	int numero;
+	printf("\nIntroduzca los valores:\n");
+
+	float U, alpha;
+
+	// Velocidad del aire incidente
+	printf("U: ");
+	scanf ("%f", &U);
+	while (U>=3 || U<=0.9)
+	{
+		printf("Valor no valido:");
+		scanf ("%f", &U);
+		printf("\n");
+	}
+
+	dflujo[0] = U;
+
+	// Ángulo de ataque
+	printf("Alpha: ");
+	scanf ("%f", &alpha);
+	
+	alpha = deg2rad(alpha);
+
+	dflujo[1]= alpha;
+
+	// Densidad del aire
+	printf("Densidad del aire: ");
+	scanf ("%f", &dflujo[2]);
+
+	// Corriente T
+	dperfil[3] = 4 * M_PI * dperfil[4] * dflujo[0] * sin(dflujo[1]);
+
+	//Coeficiente de sustentación CL
+	dflujo[4] = 2*M_PI*sin(dflujo[1]+dperfil[3]);
+
+
+	return 0;
+}
+
+
+/* Crea dos matrices que almacenan las coordenadas x e y de la malla respectivamente */
+int meshgrid(float ** xx, float ** yy, float *dperfil)
+{
+	int i, j;
+
+	float * rango;
+	rango = (float *) malloc(M * sizeof(float));
+
+	linspace(rango, dperfil[6]-2, dperfil[7]+2, M); // Toma las dimensiones de la malla en función de la dimensión del perfil
+
+	for (i = 0; i < M; i++)
+	{
+		xx[i] = rango;
+	}
+
+	for (i = 0; i < M; i++)
+		for (j = 0; j < M; j++)
+		{
+			yy[i][j] = rango[i];
+		}
+
+
+	return 0;
+}	
+
+
+/* Calcula el flujo en cada punto de la malla y lo devuelve en psi */
+int calculo_flujo(float * dperfil, float * dflujo, float ** xx, float ** yy, float ** psi)
+{
+	int i,j;
+	float rho, theta, T;
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			// Transformación desde la forma compleja
+			rho = sqrt(pow(xx[i][j] - dperfil[0],2) + pow(yy[i][j] - dperfil[1],2)); 
+			theta = atan((yy[i][j] - dperfil[1])/(xx[i][j] - dperfil[0]));
+
+			// Flujo del remolino para que se cumple la condición de Kutta-Yukovski
+			T = 4 * M_PI * dperfil[4] * dflujo[0] * sin(dflujo[1]);
+
+			// Flujo complejo en un punto
+			if (xx[i][j] > dperfil[0])
+				psi[i][j] = dflujo[0] * (rho * sin(theta - dflujo[1]) - (pow(dperfil[2],2)/rho) * sin(theta - dflujo[1])) + (T/(2*M_PI)) * log(fabs(rho));
+			else
+				psi[i][j] = -dflujo[0] * (rho * sin(theta - dflujo[1]) - (pow(dperfil[2],2)/rho) * sin(theta - dflujo[1])) + (T/(2*M_PI)) * log(fabs(rho));
+		}
+
+
+	return 0;
+}
+
+
+/* Exporta la malla y el flujo en sus puntos para imprimir con GNU Plot */
+/* Guarda en "pts_flujo_cilindro.dat" (X Y psi) por columnas */
+int imprimir_flujo(float ** xx, float ** yy, float ** psi)
+{
+	FILE * file_flujo_cilindro;
+	file_flujo_cilindro = fopen("pts_flujo_cilindro.dat", "w+");
+
+	if (file_flujo_cilindro == NULL)
+	{
+		printf("Error al abrir el archivo\n");
+		return(0);
+		//TODO_p: a dónde vamos, al menú
+	}
+
+	int i, j;
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			fprintf(file_flujo_cilindro, "%f %f %f\n", xx[i][j], yy[i][j], psi[i][j]); // Escribe cada punto (fila de la matriz) en el archivo
+		}
+
+	fclose(file_flujo_cilindro); // Cierre del archivo
+
+	return 0;
+}
+
+
+/* Plotea el flujo del cilindro */
+int plotfc (float *opfc)
+{
+	// Tubería UNIX para usar GNU Plot desde el programa
+	FILE *pipefc = popen ("gnuplot -pesist","w"); 
+
+	fprintf(pipefc, "set terminal push\n set terminal unknown\n set table 'temp.dat'\n set dgrid3d 31,31\n set view map\n unset surface\n set contour\n set cntrparam bspline\n set cntrparam levels incr -10,0.3,10\n splot 'pts_flujo_cilindro.dat' using 1:2:3 with lines\n unset table\n unset dgrid3d\n unset key\n set terminal pop\n");
+	fprintf(pipefc, "set size ratio 1\n plot 'temp.dat' with lines lc %.0f lw %f, 'pts_circun.dat' with filledcurves x1 fs pattern 3 lc %.0f\n !rm temp.dat\n", opfc[0], opfc[1], opfc[2]);
+
+	pclose (pipefc);
+
+
+	return 0;
+}
+
+
+int flujo(float * dperfil, float * opc, float * opp, float * opf)
+{
+	int i;
+
+	// Vector con los datos del flujo
+	float * dflujo;
+	dflujo = (float *) malloc(5 * sizeof(float)); // Reserva de memoria para el vector
+
+	// Datos del cilindro
+	if ((dperfil[0]==0)&&(dperfil[1]==0)&&(dperfil[2]==0)&&(dperfil[3]==0)) // Si no se han dado los datos del cilindro 
+	{
+		do
+		{
+			datos_perfil(dperfil);
+		} while (limites(dperfil) == 0);
+	}
+
+	// Datos para el flujo
+	datos_flujo(dperfil, dflujo);
+
+	// Array para las coordenadas x de la malla
+	float ** xx;
+	xx = (float **) malloc(M * sizeof(float *));
+
+	for (i=0; i < N; i++)
+		xx[i] = (float *) malloc(M * sizeof(float));
+
+	// Array para las coordendas y de la malla
+	float ** yy;
+	yy = (float **) malloc(M * sizeof(float *));
+
+	for (i=0; i < N; i++)
+		yy[i] = (float *) malloc(M * sizeof(float));
+
+	// Array para el flujo en cada punto de la malla
+	float ** psi;
+	psi = (float **) malloc(M * sizeof(float *));
+
+	for (i=0; i < N; i++)
+		psi[i] = (float *) malloc(M * sizeof(float));
+
+	// Crea la malla en la que calcularemos el flujo
+	meshgrid(xx, yy, dperfil);
+
+	// Calcula el flujo en cada punto de la malla para el cilindro
+	calculo_flujo(dperfil, dflujo, xx, yy, psi);
+
+	// Exporta puntos para imprimir el flujo en el cilindro con GNU Plot
+	imprimir_flujo(xx, yy, psi);
+
+	printf("\n");
+	printf("\nFlujo: %f\n", dflujo[3]);
+	printf("Coeficiente de sustentación: %f\n", dflujo[4]); // TODO_j: ¿Esto qué es?
+
+	plotfc(opf);
+
+
+	return 0;
+}
+
+
+/* Contiene el menú principal del programa  llama al resto de las funciones */
+int menu(int control, float * dperfil, float * opc, float * opp, float * opf)
+{
+	int opcion;
 
 	if (control==0)
 	{
@@ -784,23 +1068,23 @@ int menu(int control, float * opc, float * opp, float * opf)
 		printf("\033[0m\n");	
 	}
 
-	scanf("%d",&numero);
+	scanf("%d",&opcion);
 
-	switch(numero)
+	switch(opcion)
 	{
 		case 1: // Cálculo del perfil alar
-		    perfil(opc, opp, opf);   
-			menu(0, opc, opp, opf); // Llama al menú como si el programa volviese a empezar
+		    perfil(dperfil, opc, opp, opf);   
+			menu(0, dperfil, opc, opp, opf); // Llama al menú como si el programa volviese a empezar
 		    break;
 		            
 		case 2: // Cálculo del flujo en el perfil
-		    printf("Flujo\n");
-		    menu(0, opc, opp, opf);
+		    flujo(dperfil, opc, opp, opf); 
+		    menu(0, dperfil, opc, opp, opf);
 		    break;
 
 		case 3: // Opciones
 		    menu_opciones(opc, opp, opf);
-		    menu(0, opc, opp, opf);
+		    menu(0, dperfil, opc, opp, opf);
 		    break;
 
         case 4: // Salir
@@ -809,7 +1093,7 @@ int menu(int control, float * opc, float * opp, float * opf)
      	    break; 
      	
      	default:
-            menu(1 ,opc, opp, opf); // Si no se selecciona ninguna opción correcta llama al menú sin imprimir las opciones hasta que se elija una que lo sea
+            menu(1, dperfil, opc, opp, opf); // Si no se selecciona ninguna opción correcta llama al menú sin imprimir las opciones hasta que se elija una que lo sea
             break;        
 	}	
 
@@ -825,8 +1109,15 @@ int menu(int control, float * opc, float * opp, float * opf)
 
 int main(int argc, char const *argv[])
  {
+	// Vector con los datos del perfil {Xc, Yc, a, beta, b, caso}
+	float * dperfil;
+	dperfil = (float *) malloc(13 * sizeof(float)); // Reserva de memoria para el vector
+	dperfil[0] = 0;
+	dperfil[1] = 0;
+	dperfil[2] = 0;
+	dperfil[3] = 0;
+
  	// Opciones para la impresión de la circunferencia con GNU Plot
-	// TODO_p: ¿esto no viene de antes? Ya que lo modificas - No lo entiendo tio :S
 	float * opc; 
 	opc = (float *) malloc(5 * sizeof(float)); //Reserva de memoria para el vector
 
@@ -845,11 +1136,17 @@ int main(int argc, char const *argv[])
 	opp[3] = 2;
 	opp[4] = 9; 
 	
-	// TODO_p: son las opciones del plot de circunferencia perfil y flujo
+	// Opciones para la impresión del flujo
 	float * opf; // TODO_j modificar valores iniciales
 	opf = (float *) malloc(5 * sizeof(float));
+	opf[0] = 3;
+	opf[1] = 1.5;
+	opf[2] = 9;
+	// TODO_j: ¿Solo unas opciones?
 
- 	menu(0 , opc, opp, opf);
+	// Primera llamada al menú
+ 	menu(0 , dperfil, opc, opp, opf);
+
 
   	return 0;
  }
