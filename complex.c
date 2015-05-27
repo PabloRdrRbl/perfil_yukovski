@@ -165,7 +165,7 @@ int arregla_malla(complex double **tt)
 	for (i = 0; i < M; ++i)
 		for (j = 0; j < M; ++j)
 		{
-			if (cabs(tt[i][j]-t0) < 1 * R)
+			if (cabs(tt[i][j]-t0) < R)
 				tt[i][j]=0;
 		}
 
@@ -259,21 +259,112 @@ int imprimir_todo(float **xxtau, float **yytau, double **psi)
 
 	int i, j;
 
+	for (j = 0; j < M; j++)
+	{
+		for (i = 0; i < M; i++)
+		{
+			fprintf(matriz_archivo, "%f ", xxtau[i][j]);
+			fprintf(matriz_archivo, "%f ", yytau[i][j]);
+			fprintf(matriz_archivo, "%lf \n", psi[i][j]);
+		}
+
+		fprintf(matriz_archivo, "\n");
+	}
+	
+	return 0;
+}
+
+int imprimir_todo_izq(float **xxtau, float **yytau, double **psi)
+{
+	FILE * matriz_archivo;
+	matriz_archivo = fopen("putos1.dat", "w+");
+
+	int i, j;
+
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < M; j++)
 		{
-			if (isinf(xxtau[i][j]))
-			{
-				fprintf(matriz_archivo, "%f ", 500);
-				fprintf(matriz_archivo, "%f ", 500);
-				fprintf(matriz_archivo, "%lf \n", 500);
-			}
-			else
+			if (xxtau[i][j] < -2.54)
 			{
 				fprintf(matriz_archivo, "%f ", xxtau[i][j]);
 				fprintf(matriz_archivo, "%f ", yytau[i][j]);
 				fprintf(matriz_archivo, "%lf \n", psi[i][j]);
+			}
+		}
+	}
+	
+	return 0;
+}
+
+int imprimir_todo_der(float **xxtau, float **yytau, double **psi)
+{
+	FILE * matriz_archivo;
+	matriz_archivo = fopen("putos2.dat", "w+");
+
+	int i, j;
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			if (xxtau[i][j] > 2.31)
+			{
+				fprintf(matriz_archivo, "%f ", xxtau[i][j]);
+				fprintf(matriz_archivo, "%f ", yytau[i][j]);
+				fprintf(matriz_archivo, "%lf \n", psi[i][j]);
+			}
+		}
+	}
+	
+	return 0;
+}
+
+int imprimir_todo_deb(float **xxtau, float **yytau, double **psi)
+{
+	FILE * matriz_archivo;
+	matriz_archivo = fopen("putos3.dat", "w+");
+
+	int i, j;
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			if (xxtau[i][j] < 2.31 && xxtau[i][j] > -2.54)
+			{
+				if (yytau[i][j] < -0.28)
+				{
+					fprintf(matriz_archivo, "%f ", xxtau[i][j]);
+					fprintf(matriz_archivo, "%f ", yytau[i][j]);
+					fprintf(matriz_archivo, "%lf \n", psi[i][j]);
+				}
+			}
+		}
+	}
+	
+	return 0;
+}
+
+int imprimir_todo_arr(float **xxtau, float **yytau, double **psi)
+{
+	FILE * matriz_archivo;
+	matriz_archivo = fopen("putos4.dat", "w+");
+
+	int i, j;
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			if (xxtau[i][j] < 2.31 && xxtau[i][j] > -2.54)
+			{
+				if (yytau[i][j] > 1.35)
+				{
+					fprintf(matriz_archivo, "%f ", xxtau[i][j]);
+					fprintf(matriz_archivo, "%f ", yytau[i][j]);
+					fprintf(matriz_archivo, "%lf \n", psi[i][j]);
+				}
 			}
 		}
 	}
@@ -335,6 +426,10 @@ int flujo(/*float * dperfil ,float * opf*/) // TODO_p: al juntar unir las opcion
 	imprimir_psitau(psi);
 
 	imprimir_todo(xxtau, yytau, psi);
+	imprimir_todo_izq(xxtau, yytau, psi);
+	imprimir_todo_der(xxtau, yytau, psi);
+	imprimir_todo_deb(xxtau, yytau, psi);
+	imprimir_todo_arr(xxtau, yytau, psi);
 
 	return 0;
 }
