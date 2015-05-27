@@ -69,11 +69,13 @@ int datos_perfil(float * dperfil)
 	// El caso queda definido al pasar el vector por limites
 	dperfil[5] = 0; // Por ahora
 
-	//Futuros limites dinamicos del ploteo incializados a cero
-	dperfil[6] = 0; //-X ploteo circunferencia
-	dperfil[7] = 0; //+X ploteo circunferencia
-	dperfil[8] = 0; //-Y ploteo circunferencia
-	dperfil[9] = 0; //+Y ploteo circunferencia
+	//Futuros limites dinamicos del ploteo
+	dperfil[6] = dperfil[0] - dperfil[2] - 1; //-X ploteo circunferencia
+	dperfil[7] = dperfil[0] + dperfil[2] + 1; //+X ploteo circunferencia
+	dperfil[8] = dperfil[1] - dperfil[2] - 1; //-Y ploteo circunferencia
+	dperfil[9] = dperfil[1] + dperfil[2] + 1; //+Y ploteo circunferencia
+
+	//Datos dinamicos del ploteo del perfil inicicalizados a cero
 	dperfil[10] = 0; //-X ploteo perfil
 	dperfil[11] = 0; //+X ploteo perfil
 	dperfil[12] = 0; //-Y ploteo perfil
@@ -868,7 +870,6 @@ int datos_flujo (float *dperfil, float *dflujo)
 	{
 		printf("Valor no valido:");
 		scanf ("%f", &U);
-		printf("\n");
 	}
 
 	dflujo[0] = U;
@@ -886,7 +887,7 @@ int datos_flujo (float *dperfil, float *dflujo)
 	scanf ("%f", &dflujo[2]);
 
 	// Corriente T
-	dperfil[3] = 4 * M_PI * dperfil[4] * dflujo[0] * sin(dflujo[1]+dflujo[2]);
+	dflujo[3] = 4 * M_PI * dperfil[4] * dflujo[0] * sin(dflujo[1]);
 
 	//Coeficiente de sustentación CL
 	dflujo[4] = 2*M_PI*sin(dflujo[1]+dperfil[3]);
@@ -1062,7 +1063,7 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 
 	printf("\n");
 	printf("\nFlujo: %f\n", dflujo[3]);
-	printf("Coeficiente de sustentación: %f\n", dflujo[4]); // TODO_j: ¿Esto qué es?
+	printf("Coeficiente de sustentación: %lf\n", fabsf(dflujo[4])); // TODO_j: ¿Esto qué es?
 
 	plotfc(opf);
 
