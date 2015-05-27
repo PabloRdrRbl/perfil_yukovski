@@ -165,7 +165,7 @@ int arregla_malla(complex double **tt)
 	for (i = 0; i < M; ++i)
 		for (j = 0; j < M; ++j)
 		{
-			if (cabs(tt[i][j]-t0) < R)
+			if (cabs(tt[i][j]-t0) < 1.05 * R)
 				tt[i][j]=0;
 		}
 
