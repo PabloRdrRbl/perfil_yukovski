@@ -187,6 +187,69 @@ int nueva_malla (float **xxtau, float **yytau, complex double ** tt)
 	return 0;
 }
 
+int imprimir_xxtau(float ** matriz)
+{
+	FILE * matriz_archivo;
+	matriz_archivo = fopen("xxtau.dat", "w+");
+
+	int i, j;
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			fprintf(matriz_archivo, "%f ", matriz[i][j]);
+		}
+
+		fprintf(matriz_archivo, "\n");
+	}
+	
+	return 0;
+}
+
+int imprimir_yytau(float ** matriz)
+{
+	FILE * matriz_archivo;
+	matriz_archivo = fopen("yytau.dat", "w+");
+
+	int i, j;
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			fprintf(matriz_archivo, "%f ", matriz[i][j]);
+		}
+
+		fprintf(matriz_archivo, "\n");
+	}
+	
+	return 0;
+}
+
+
+
+int imprimir_psitau(double ** matriz)
+{
+	FILE * matriz_archivo;
+	matriz_archivo = fopen("psitau.dat", "w+");
+
+	int i, j;
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			fprintf(matriz_archivo, "%f ", matriz[i][j]);
+		}
+
+		fprintf(matriz_archivo, "\n");
+	}
+	
+	return 0;
+}
+
+
 int flujo(/*float * dperfil ,float * opf*/) // TODO_p: al juntar unir las opciones
 {
 	int i;
@@ -235,6 +298,10 @@ int flujo(/*float * dperfil ,float * opf*/) // TODO_p: al juntar unir las opcion
 	arregla_malla(tt);
 
 	nueva_malla(xxtau, yytau, tt);
+
+	imprimir_yytau(yytau);
+	imprimir_xxtau(xxtau);
+	imprimir_psitau(psi);
 
 	return 0;
 }
