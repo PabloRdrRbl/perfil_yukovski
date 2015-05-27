@@ -886,7 +886,7 @@ int datos_flujo (float *dperfil, float *dflujo)
 	scanf ("%f", &dflujo[2]);
 
 	// Corriente T
-	dperfil[3] = 4 * M_PI * dperfil[4] * dflujo[0] * sin(dflujo[1]);
+	dperfil[3] = 4 * M_PI * dperfil[4] * dflujo[0] * sin(dflujo[1]+dflujo[2]);
 
 	//Coeficiente de sustentación CL
 	dflujo[4] = 2*M_PI*sin(dflujo[1]+dperfil[3]);
@@ -1002,6 +1002,15 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 	float * dflujo;
 	dflujo = (float *) malloc(5 * sizeof(float)); // Reserva de memoria para el vector
 
+	// Matriz Nx2 que almacenará los puntos de la circunferencia
+	float ** circunferencia;
+	circunferencia = (float **) malloc(N * sizeof(float *)); // Reserva de memoria para cada vector
+
+	for (i=0; i < N; i++)
+	{
+		circunferencia[i] = (float *) malloc(2 * sizeof(float)); // Reserva de memoria para las dos coordenadas del vector
+	}
+
 	// Datos del cilindro
 	if ((dperfil[0]==0)&&(dperfil[1]==0)&&(dperfil[2]==0)&&(dperfil[3]==0)) // Si no se han dado los datos del cilindro 
 	{
@@ -1013,6 +1022,13 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 
 	// Datos para el flujo
 	datos_flujo(dperfil, dflujo);
+
+	// Calcula los puntos de la circunferencia
+	matriz_circunferencia(dperfil, circunferencia);
+
+	// Guarda los puntos de la circunferencia en el archivo pts_circunferencia.dat
+	if (imprimir_circunferencia(circunferencia)) // Si la apertura falla vuelve al menú
+				menu(0, dperfil, opc, opp, opf);
 
 	// Array para las coordenadas x de la malla
 	float ** xx;
