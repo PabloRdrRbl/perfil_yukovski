@@ -62,47 +62,50 @@ int imprimir_matriz_compleja(complex double ** matriz)
 
 
 /* La función devuelve las n divisiones equiespaciadas del intervalo dado */ 
-float * linspace(float x0, float x, int n)
+int linspace(float * vector, float x0, float x, int n)
 {
 	int i;
 	float parte;
 
-	float *vector; // Vector de salida del espacio
-	vector = (float *) malloc(n * sizeof(float)); // Memoria reservada para el vector
-
 	vector[0] = x0; // Valor incial
 	vector[n] = x; // Valor final
 
-	parte = (x - x0) / (float) n; // Intervalo
+	parte = (x - x0) / (float) (n-1); // Intervalo
 
 	for (i=1; i < n; i++)
 	{
 		vector[i] = vector[i-1] + parte;
 	}
 
-	return(vector);
+	return 0;
 }
+
 
 int meshgrid(float ** xx, float ** yy, complex double ** tt)
 {
 	int i, j;
 
-	int xmax = 5;
+	int xmax = 8;
+	int ymax = 3;
 
-	float * rango;
-	rango = (float *) malloc(M * sizeof(float));
+	float * rangox;
+	rangox = (float *) malloc(M * sizeof(float));
 
-	rango = linspace(-xmax, xmax, M);
+	float * rangoy;
+	rangoy = (float *) malloc(M * sizeof(float));
+
+	linspace(rangox, -xmax, xmax, M);
+	linspace(rangoy, -ymax, ymax, M);
 
 	for (i = 0; i < M; i++)
 	{
-		xx[i] = rango;
+		xx[i] = rangox;
 	}
 
 	for (i = 0; i < M; i++)
 		for (j = 0; j < M; j++)
 		{
-			yy[i][j] = rango[i];
+			yy[i][j] = rangoy[i];
 		}
 
 	for (i = 0; i < M; i++)
@@ -162,7 +165,7 @@ int arregla_malla(complex double **tt)
 	for (i = 0; i < M; ++i)
 		for (j = 0; j < M; ++j)
 		{
-			if (cabs(tt[i][j]-t0) < 0.95 * R)
+			if (cabs(tt[i][j]-t0) < 1 * R)
 				tt[i][j]=0;
 		}
 
@@ -249,6 +252,34 @@ int imprimir_psitau(double ** matriz)
 	return 0;
 }
 
+int imprimir_todo(float **xxtau, float **yytau, double **psi)
+{
+	FILE * matriz_archivo;
+	matriz_archivo = fopen("putos.dat", "w+");
+
+	int i, j;
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			if (isinf(xxtau[i][j]))
+			{
+				fprintf(matriz_archivo, "%f ", 500);
+				fprintf(matriz_archivo, "%f ", 500);
+				fprintf(matriz_archivo, "%lf \n", 500);
+			}
+			else
+			{
+				fprintf(matriz_archivo, "%f ", xxtau[i][j]);
+				fprintf(matriz_archivo, "%f ", yytau[i][j]);
+				fprintf(matriz_archivo, "%lf \n", psi[i][j]);
+			}
+		}
+	}
+	
+	return 0;
+}
 
 int flujo(/*float * dperfil ,float * opf*/) // TODO_p: al juntar unir las opciones
 {
@@ -299,9 +330,11 @@ int flujo(/*float * dperfil ,float * opf*/) // TODO_p: al juntar unir las opcion
 
 	nueva_malla(xxtau, yytau, tt);
 
-	imprimir_yytau(yytau);
 	imprimir_xxtau(xxtau);
+	imprimir_yytau(yytau);
 	imprimir_psitau(psi);
+
+	imprimir_todo(xxtau, yytau, psi);
 
 	return 0;
 }
