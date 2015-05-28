@@ -131,7 +131,7 @@ int calculo_flujo(complex double ** tt, double ** psi)
 	for (i = 0; i < M; ++i)
 		for (j = 0; j < M; ++j)
 		{
-			psi[i][j] = cimag(U * ((tt[i][j]-t0)*cexp(-alpha*I)+pow(R,2)/(tt[i][j]-t0)*cexp(-alpha*I)) + I * T/(2*M_PI)*clog(tt[i][j]-t0));
+			psi[i][j] = cimag(U * ((tt[i][j]-t0)*cexp(-alpha*I)+pow(R,2)/(tt[i][j]-t0)*cexp(alpha*I)) + I * T/(2*M_PI)*clog(tt[i][j]-t0));
 		}
 
 	return 0;
@@ -165,7 +165,7 @@ int arregla_malla(complex double **tt)
 	for (i = 0; i < M; ++i)
 		for (j = 0; j < M; ++j)
 		{
-			if (cabs(tt[i][j]-t0) < R)
+			if (cabs(tt[i][j]-t0) < 1.05 * R)
 				tt[i][j]=0;
 		}
 
@@ -186,6 +186,61 @@ int nueva_malla (float **xxtau, float **yytau, complex double ** tt)
 			xxtau[i][j] = creal(tau);
 			yytau[i][j] = cimag(tau);
 		}
+
+	return 0;
+}
+
+int simetrica_matriz(float ** matriz)
+{
+	int i, j;
+
+	float ** copia;
+	copia = (float **) malloc(M * sizeof(float *));
+	for (i=0; i < M; i++)
+		copia[i] = (float *) malloc(M * sizeof(float));
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			copia[i][j] = matriz[i][j];
+		}
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			matriz[i][M-1-j] = copia[i][j];
+		}
+
+
+	return 0;
+}
+
+
+int simetrica_matriz_double(double ** matriz)
+{
+	int i, j;
+
+	printf("Puta1\n");
+
+
+	float ** copia;
+	copia = (float **) malloc(M * sizeof(float *));
+	for (i=0; i < M; i++)
+		copia[i] = (float *) malloc(M * sizeof(float));
+
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			copia[i][j] = (float) matriz[i][j];
+		}
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			matriz[i][M-1-j] = (double) copia[i][j];
+		}
+
 
 	return 0;
 }
@@ -420,6 +475,10 @@ int flujo(/*float * dperfil ,float * opf*/) // TODO_p: al juntar unir las opcion
 	arregla_malla(tt);
 
 	nueva_malla(xxtau, yytau, tt);
+
+	simetrica_matriz(xxtau);
+	simetrica_matriz(yytau);
+	simetrica_matriz_double(psi);
 
 	imprimir_xxtau(xxtau);
 	imprimir_yytau(yytau);
