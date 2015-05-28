@@ -714,7 +714,7 @@ int menu_flujo_cil (float * opc, float * opp, float * opfc)
 	scanf ("%d", &opcion);
 	while (opcion!=1 && opcion!=2 && opcion!=3 && opcion!=4) //En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
 	{
-		printf("\033[31m         Valor no valido\n"); // TODO_j si no quereis que haga nada - color
+		printf("\033[31mValor no valido"); 
 		printf("\033[0m\n");
 		scanf("%d", &opcion);
 	}
@@ -722,59 +722,62 @@ int menu_flujo_cil (float * opc, float * opp, float * opfc)
 	switch(opcion)
 	{
 		case 1:
-			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris\n");
-			printf("\033[0m\n");
+			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris");
+	        printf("\033[0m\n");
 			scanf ("%d", &lcc);
 
-			while (lcc!=1 && lcc!=2 && lcc!=3 && lcc!=7 && lcc!=9)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
+			while (lcc!=1 && lcc!=2 && lcc!=3 && lcc!=7 && lcc!=9)
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31m  Valor no valido"); 
 				printf("\033[0m\n");
 				scanf("%d", &lcc);
 			}
 
-			opfc[0]= (float) lcc;  // Introducimos el valor obtenido (con su correspondiente casting) en el vector
+			opfc[0]= (float) lcc;
 
-			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del circulo
+			menu_perfil (opc, opp, opfc); // Se vuelve al menu del perfil
 			break;
 
 		case 2:
 			printf("\033[33m  Tamaño de la linea de flujo: ");
-			printf("\033[0m");
+			printf("\033[0m ");
 			scanf ("%f", &lw);
 
 			opfc[2]=lw;  // Introducimos el valor obtenido en el vector
+
+			printf("\033[0m\n");
 
 			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del circulo
 			break;
 
 		case 3:
-			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris\n");
-			printf("\033[0m\n");
+			printf("\033[33m  (1) Rojo \n  (2) Verde \n  (3) Azul \n  (7) Negro \n  (9) Gris");
+	        printf("\033[0m\n");
 			scanf ("%d", &lcf);
 
-			while (lcf!=1 && lcf!=2 && lcf!=3 && lcf!=7 && lcf!=9)  // En caso de que el valor introducido sea diferente del esperado, espera otra introduccion
+			while (lcf!=1 && lcf!=2 && lcf!=3 && lcf!=7 && lcf!=9)
 			{	
-				printf("\033[31mValor no valido\n"); // TODO_j si no quereis que haga nada - color
+				printf("\033[31m  Valor no valido"); 
 				printf("\033[0m\n");
 				scanf("%d", &lcf);
 			}
 
-			opfc[2]= (float) lcf;  // Introducimos el valor obtenido (con su correspondiente casting) en el vector
+			opfc[2]= (float) lcf;
 
-			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del circulo
+			menu_perfil (opc, opp, opfc); // Se vuelve al menu del perfil
 			break;
 
-		/*case 4: TODO_j
+
+		case 4: 
 			menu_opciones(opc, opp, opfc); // Se vuelve al menu de opciones
-			break;*/
+			break;
 	}
 
 	return 0;
 }
 
 
-/* Menu para modificar opciones de plot */ // TODO_j: revisar alineado y tabulacion
+/* Menu para modificar opciones de plot */ 
 int menu_opciones (float * opc, float * opp, float * opf)
 {
 	int opcion;
@@ -962,7 +965,6 @@ int imprimir_flujo(float ** xx, float ** yy, float ** psi)
 	{
 		printf("Error al abrir el archivo\n");
 		return(0);
-		//TODO_p: a dónde vamos, al menú
 	}
 
 	int i, j;
@@ -980,7 +982,7 @@ int imprimir_flujo(float ** xx, float ** yy, float ** psi)
 
 
 /* Plotea el flujo del cilindro */
-int plotfc (float *opfc)
+int plotfc (float *opf)
 {
 	// Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipefc = popen ("gnuplot -pesist","w"); 
@@ -998,6 +1000,7 @@ int plotfc (float *opfc)
 int flujo(float * dperfil, float * opc, float * opp, float * opf)
 {
 	int i;
+	char opcion;
 
 	// Vector con los datos del flujo
 	float * dflujo;
@@ -1013,12 +1016,24 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 	}
 
 	// Datos del cilindro
-	if ((dperfil[0]==0)&&(dperfil[1]==0)&&(dperfil[2]==0)&&(dperfil[3]==0)) // Si no se han dado los datos del cilindro 
+	if (dperfil[2]==0) // Si no se han dado los datos del cilindro 
 	{
 		do
 		{
 			datos_perfil(dperfil);
 		} while (limites(dperfil) == 0);
+	}
+	else
+	{
+		printf("¿Desea dar nuevos valores? (s/n)\n");
+		scanf ("%c", &opcion);
+		if (opcion == s)
+		{
+			do
+			{
+				datos_perfil(dperfil);
+			} while (limites(dperfil) == 0);
+		}
 	}
 
 	// Datos para el flujo
@@ -1063,7 +1078,7 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 
 	printf("\n");
 	printf("\nFlujo: %f\n", dflujo[3]);
-	printf("Coeficiente de sustentación: %lf\n", fabsf(dflujo[4])); // TODO_j: ¿Esto qué es?
+	printf("Coeficiente de sustentación: %lf\n", fabsf(dflujo[4])); 
 
 	plotfc(opf);
 
@@ -1154,12 +1169,11 @@ int main(int argc, char const *argv[])
 	opp[4] = 9; 
 	
 	// Opciones para la impresión del flujo
-	float * opf; // TODO_j modificar valores iniciales
-	opf = (float *) malloc(5 * sizeof(float));
+	float * opf; 
+	opf = (float *) malloc(3 * sizeof(float));
 	opf[0] = 3;
 	opf[1] = 1.5;
 	opf[2] = 9;
-	// TODO_j: ¿Solo unas opciones?
 
 	// Primera llamada al menú
  	menu(0 , dperfil, opc, opp, opf);
