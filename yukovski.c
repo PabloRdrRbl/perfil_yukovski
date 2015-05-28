@@ -982,7 +982,7 @@ int imprimir_flujo(float ** xx, float ** yy, float ** psi)
 
 
 /* Plotea el flujo del cilindro */
-int plotfc (float *opf)
+int plotfc (float *opfc)
 {
 	// Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipefc = popen ("gnuplot -pesist","w"); 
@@ -1027,7 +1027,7 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 	{
 		printf("¿Desea dar nuevos valores? (s/n)\n");
 		scanf ("%c", &opcion);
-		if (opcion == s)
+		if (opcion == 's')
 		{
 			do
 			{
