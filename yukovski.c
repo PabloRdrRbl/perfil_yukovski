@@ -706,7 +706,7 @@ int menu_perfil (float * opc, float * opp, float * opf)
 /* Menú para modificar opciones de plot del flujo del cilindro */
 int menu_flujo_cil (float * opc, float * opp, float * opfc)
 {
-	printf("\033[33m   1. Color de flujo \n   2. Tamaño de la linea de flujo\n   3. Color del cilindro \n   4. Salir\n"); // 1: (l)ine(c)olor flujo   2: (l)ine(w)idth   3:(l)ine(c)olor cilindro  
+	printf("\033[33m   1. Color de flujo \n   2. Tamaño de la linea de flujo\n   3. Color del cilindro \n   4. Salir"); // 1: (l)ine(c)olor flujo   2: (l)ine(w)idth   3:(l)ine(c)olor cilindro  
 	printf("\033[0m\n");
 	int opcion, lcf, lcc;
 	float lw;
@@ -735,7 +735,7 @@ int menu_flujo_cil (float * opc, float * opp, float * opfc)
 
 			opfc[0]= (float) lcc;
 
-			menu_perfil (opc, opp, opfc); // Se vuelve al menu del perfil
+			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del flujo
 			break;
 
 		case 2:
@@ -747,7 +747,7 @@ int menu_flujo_cil (float * opc, float * opp, float * opfc)
 
 			printf("\033[0m\n");
 
-			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del circulo
+			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del flujo
 			break;
 
 		case 3:
@@ -764,7 +764,7 @@ int menu_flujo_cil (float * opc, float * opp, float * opfc)
 
 			opfc[2]= (float) lcf;
 
-			menu_perfil (opc, opp, opfc); // Se vuelve al menu del perfil
+			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del perfil
 			break;
 
 
@@ -1000,7 +1000,7 @@ int plotfc (float *opfc)
 int flujo(float * dperfil, float * opc, float * opp, float * opf)
 {
 	int i;
-	char opcion;
+	char opcionf, opcion;
 
 	// Vector con los datos del flujo
 	float * dflujo;
@@ -1025,7 +1025,8 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 	}
 	else
 	{
-		printf("¿Desea dar nuevos valores? (s/n)\n");
+		printf("\n¿Desea dar nuevos valores al cilindro? (s/n)\n");
+		scanf ("%c", &opcionf);
 		scanf ("%c", &opcion);
 		if (opcion == 's')
 		{
@@ -1077,7 +1078,10 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 	imprimir_flujo(xx, yy, psi);
 
 	printf("\n");
-	printf("\nFlujo: %f\n", dflujo[3]);
+	if (dflujo[3] != 0)
+	{
+		printf("\nFlujo: %f\n", dflujo[3]);
+	}
 	printf("Coeficiente de sustentación: %lf\n", fabsf(dflujo[4])); 
 
 	plotfc(opf);
