@@ -48,7 +48,8 @@ float deg2rad(float deg)
 /* Introducción de los valores para calcular perfil */
 int datos_perfil(float * dperfil) 
 {
-	printf("\nIntroduzca los valores:\n");
+	printf("\033[32m \nIntroduzca los valores:");
+	printf("\033[0m\n");
 
 	printf("Xc: "); 
 	scanf ("%f", &dperfil[0]);
@@ -110,7 +111,7 @@ float f4(float x, float y)
 /* Limita el valor de a (radio) para que la transformación sea eficaz */
 int limites(float * dperfil)
 {
-	if (dperfil[2] > 30)
+	if (dperfil[2] > 15)
 	{
 		printf("\033[31mRadio muy grande "); 
 		printf("\033[0m\n");	
@@ -510,7 +511,8 @@ int menu_circ (float * opc, float * opp, float * opf)
 
 			if (ps > 2)
 			{
-				printf("Te van a quedar puntos muy grandes!\n"); //TODO
+				printf("\033[31m Te van a quedar puntos muy grandes!");
+				printf("\033[0m\n");
 			}
 
 			menu_circ (opc, opp, opf); // Se vuelve al menu del circulo
@@ -621,7 +623,8 @@ int menu_perfil (float * opc, float * opp, float * opf)
 
 			if (ps > 2)
 			{
-				printf("Te van a quedar puntos muy grandes!\n"); //TODO
+				printf("\033[31m Te van a quedar puntos muy grandes!");
+				printf("\033[0m\n");
 			}
 
 			menu_perfil (opc, opp, opf); // Se vuelve al menu del perfil
@@ -733,7 +736,8 @@ int menu_flujo (float * opc, float * opp, float * opf)
 
 			if (lw > 2)
 			{
-				printf("Te van a quedar lineas muy gruesas!\n"); //TODO
+				printf("\033[31m Te van a quedar lineas muy gruesas!");
+				printf("\033[0m\n");			
 			}
 
 			menu_flujo (opc, opp, opf); // Se vuelve al menu del flujo
@@ -850,7 +854,8 @@ int perfil(float * dperfil, float * opc, float * opp, float * opf)
 /* Introducción de los datos para el cálculo del flujo */
 int datos_flujo (float *dperfil, float *dflujo)
 {
-	printf("\nIntroduzca los valores:\n");
+	printf("\033[32m \nIntroduzca los valores:");
+	printf("\033[0m\n");
 
 	float U, alpha;
 
@@ -859,7 +864,8 @@ int datos_flujo (float *dperfil, float *dflujo)
 	scanf ("%f", &U);
 	while (U>=3 || U<=0.9)
 	{
-		printf("Valor no valido:");
+		printf("\033[31mValor no valido:");
+		printf("\033[0m ");
 		scanf ("%f", &U);
 	}
 
@@ -876,6 +882,12 @@ int datos_flujo (float *dperfil, float *dflujo)
 	// Densidad del aire
 	printf("Densidad del aire: ");
 	scanf ("%f", &dflujo[2]);
+	
+	if(dflujo[2] > 3)
+	{
+		printf("\033[31mEstás en un atmosfera muy densa!");
+		printf("\033[0m\n \n");
+	}
 
 	// Corriente T
 	dflujo[3] = 4 * M_PI * dperfil[4] * U * (dperfil[1] + (1+dperfil[0]) * dflujo[1]);
@@ -896,7 +908,7 @@ int meshgrid(float ** xx, float ** yy, float *dperfil)
 	float * rango;
 	rango = (float *) malloc(M * sizeof(float));
 
-	linspace(rango, dperfil[6]-2, dperfil[7]+2, M); // Toma las dimensiones de la malla en función de la dimensión del perfil
+	linspace(rango, dperfil[6]-dperfil[2], dperfil[7]+dperfil[2], M); // Toma las dimensiones de la malla en función de la dimensión del cilindro
 
 	for (i = 0; i < M; i++)
 	{
@@ -908,7 +920,6 @@ int meshgrid(float ** xx, float ** yy, float *dperfil)
 		{
 			yy[i][j] = rango[i];
 		}
-
 
 	return 0;
 }	
@@ -951,7 +962,8 @@ int imprimir_flujo(float ** xx, float ** yy, float ** psi)
 
 	if (file_flujo_cilindro == NULL)
 	{
-		printf("Error al abrir el archivo\n");
+		printf("\033[31m Error al abrir el archivo\n");
+		printf("\033[0m\n");
 		return(0);
 	}
 
@@ -970,12 +982,42 @@ int imprimir_flujo(float ** xx, float ** yy, float ** psi)
 
 
 /* Plotea el flujo del cilindro */
-int plotfc (float *opf)
+int plotfc (float *opf, float ** psi)
 {
+	int i, j;
+
+	float parte = 0;
+	float psimax = 0;
+	float psimin = 0;
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			if (psi[i][j] > psimax)
+				psimax = psi[i][j];
+
+			if (psi[i][j] < psimin)
+				psimin = psi [i][j];
+		}
+
+	parte = ((psimax - psimin)/200); // Intervalo
+
+	if (psimin+100*parte < parte)
+	{
+		parte = parte + (parte / (float) (10));
+	}
+
+	if (psimin+100*parte > parte)
+	{
+		parte = parte + (parte / (float) (10));
+	}
+
+	printf("%f-%f-%f \n", psimin, parte, psimax);
+
 	// Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipefc = popen ("gnuplot -pesist","w"); 
 
-	fprintf(pipefc, "set terminal push\n set terminal unknown\n set table 'temp.dat'\n set dgrid3d 31,31\n set view map\n unset surface\n set contour\n set cntrparam bspline\n set cntrparam levels incr -10,0.3,10\n splot 'pts_flujo_cilindro.dat' using 1:2:3 with lines\n unset table\n unset dgrid3d\n unset key\n set terminal pop\n");
+	fprintf(pipefc, "set terminal push\n set terminal unknown\n set table 'temp.dat'\n set dgrid3d 31,31\n set view map\n unset surface\n set contour\n set cntrparam bspline\n set cntrparam levels incr %f,%f,%f\n splot 'pts_flujo_cilindro.dat' using 1:2:3 with lines\n unset table\n unset dgrid3d\n unset key\n set terminal pop\n", psimin, parte, psimax);
 	fprintf(pipefc, "set size ratio 1\n plot 'temp.dat' with lines lc %.0f lw %f, 'pts_circun.dat' with filledcurves x1 fs pattern 3 lc %.0f\n !rm temp.dat\n", opf[0], opf[1], opf[2]);
 
 	pclose (pipefc);
@@ -1297,6 +1339,14 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 		circunferencia[i] = (float *) malloc(2 * sizeof(float)); // Reserva de memoria para las dos coordenadas del vector
 	}
 
+	printf("\033[32m \n1. Obtención del flujo a traves del cilindro (Th. Kutta-Yukovski)\n2. Obtención del flujo a traves del perfil alar");
+	printf("\033[0m \n");
+
+	do
+	{
+		scanf ("%d", &mct);
+	} while((mct != 1) && (mct != 2));
+
 	// Datos del cilindro
 	if (dperfil[2]==0) // Si no se han dado los datos del cilindro 
 	{
@@ -1307,9 +1357,15 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 	}
 	else
 	{
-		printf("\n¿Desea dar nuevos valores? (s/n)\n");
+		printf("\033[32m \n¿Desea dar nuevos valores? (s/n)");
+		printf("\033[0m \n");
 		scanf ("%c", &opcionf);
-		scanf ("%c", &opcion);
+
+		do
+		{
+			scanf ("%c", &opcion);
+		} while (opcion != 's' && opcion !=  'n');
+
 		if (opcion == 's')
 		{
 			do
@@ -1319,103 +1375,102 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 		}
 	}
 
-	do
-	{
-		printf("\n1. Obtencion del flujo a traves del cilindro (Th. Kutta-Yukovski)\n2. Obtencion del flujo a traves del perfil alar \n");
-		scanf ("%d", &mct);
-	} while((mct != 1) && (mct != 2));
-
-
-	// Datos para el flujo
-	datos_flujo(dperfil, dflujo);
-
-	// Calcula los puntos de la circunferencia
-	matriz_circunferencia(dperfil, circunferencia);
-
-	// Guarda los puntos de la circunferencia en el archivo pts_circunferencia.dat
-	if (imprimir_circunferencia(circunferencia)) // Si la apertura falla vuelve al menú
-				menu(0, dperfil, opc, opp, opf);
-
-	// Array para las coordenadas x de la malla
-	float ** xx;
-	xx = (float **) malloc(M * sizeof(float *));
-	for (i=0; i < M; i++)
-		xx[i] = (float *) malloc(M * sizeof(float));
-
-	// Array para las coordendas y de la malla
-	float ** yy;
-	yy = (float **) malloc(M * sizeof(float *));
-	for (i=0; i < M; i++)
-		yy[i] = (float *) malloc(M * sizeof(float));
-
-	// Array para el flujo en cada punto de la malla
-	float ** psi;
-	psi = (float **) malloc(M * sizeof(float *));
-	for (i=0; i < M; i++)
-		psi[i] = (float *) malloc(M * sizeof(float));
-
-	// Crea la malla en la que calcularemos el flujo
-	meshgrid(xx, yy, dperfil);
-
-	// Calcula el flujo en cada punto de la malla para el cilindro
-	calculo_flujo(dperfil, dflujo, xx, yy, psi);
-
-	// Exporta puntos para imprimir el flujo en el cilindro con GNU Plot
-	imprimir_flujo(xx, yy, psi);
-
-	printf("\n");
-	if (dflujo[3] != 0)
-	{
-		printf("\nFlujo: %f\n", dflujo[3]);
-	}
-	printf("Coeficiente de sustentación: %lf\n", fabsf(dflujo[4])); 
-
 	if (mct == 1)
 	{
-		plotfc(opf);
+		// Datos para el flujo
+		datos_flujo(dperfil, dflujo);
+
+		// Calcula los puntos de la circunferencia
+		matriz_circunferencia(dperfil, circunferencia);
+
+		// Guarda los puntos de la circunferencia en el archivo pts_circunferencia.dat
+		if (imprimir_circunferencia(circunferencia)) // Si la apertura falla vuelve al menú
+					menu(0, dperfil, opc, opp, opf);
+
+		// Array para las coordenadas x de la malla
+		float ** xx;
+		xx = (float **) malloc(M * sizeof(float *));
+		for (i=0; i < M; i++)
+			xx[i] = (float *) malloc(M * sizeof(float));
+
+		// Array para las coordendas y de la malla
+		float ** yy;
+		yy = (float **) malloc(M * sizeof(float *));
+		for (i=0; i < M; i++)
+			yy[i] = (float *) malloc(M * sizeof(float));
+
+		// Array para el flujo en cada punto de la malla
+		float ** psi;
+		psi = (float **) malloc(M * sizeof(float *));
+		for (i=0; i < M; i++)
+			psi[i] = (float *) malloc(M * sizeof(float));
+
+		// Crea la malla en la que calcularemos el flujo
+		meshgrid(xx, yy, dperfil);
+
+		// Calcula el flujo en cada punto de la malla para el cilindro
+		calculo_flujo(dperfil, dflujo, xx, yy, psi);
+
+		// Exporta puntos para imprimir el flujo en el cilindro con GNU Plot
+		imprimir_flujo(xx, yy, psi);
+
+		if (dflujo[3] != 0)
+		{
+			printf("\n\033[32mFlujo: ");
+			printf("\033[0m %f\n", fabsf(dflujo[3]));
+		}
+
+		printf("\033[32mCoeficiente de sustentación:"); 
+		printf("\033[0m %f\n", fabsf(dflujo[4]));
+
+		plotfc(opf, psi);
 	}
 
 	/* CAMBIAN */
 
-
-	dperfil[4] = dperfil[2]; // a 
-	dperfil[2] = dperfil[4] * sqrt((pow(1 + dperfil[0],2) + pow(dperfil[1],2))); // R
-
-
-	complex double ** tt;
-	tt = (complex double **) malloc(MM * sizeof(complex double *));
-	for (i=0; i < MM; i++)
-		tt[i] = (complex double *) malloc(MM * sizeof(complex double));
-
-	double ** psitau;
-	psitau = (double **) malloc(MM * sizeof(double *));
-	for (i=0; i < MM; i++)
-		psitau[i] = (double *) malloc(MM * sizeof(double));
-
-	float ** xxtau;
-	xxtau = (float **) malloc(MM * sizeof(float *));
-	for (i=0; i < MM; i++)
-		xxtau[i] = (float *) malloc(MM * sizeof(float));
-
-	float ** yytau;
-	yytau = (float **) malloc(MM * sizeof(float *));
-	for (i=0; i < M; i++)
-		yytau[i] = (float *) malloc(M * sizeof(float));
-
-	perfil_imaginario(dperfil);
-
-	meshgrid_imaginario(xx, yy, tt);
-
-	calculo_flujo_imaginario(tt, psitau, dperfil, dflujo);
-
-	arregla_malla(tt, dperfil);
-
-	nueva_malla(xxtau, yytau, tt);	
-
-	imprimir_todo(xxtau, yytau, psitau);
-
 	if (mct == 2)
 	{
+		// Datos para el flujo
+		datos_flujo(dperfil, dflujo);
+
+		dperfil[4] = dperfil[2]; // a 
+		dperfil[2] = dperfil[4] * sqrt((pow(1 + dperfil[0],2) + pow(dperfil[1],2))); // R
+
+
+		complex double ** tt;
+		tt = (complex double **) malloc(MM * sizeof(complex double *));
+		for (i=0; i < MM; i++)
+			tt[i] = (complex double *) malloc(MM * sizeof(complex double));
+
+		double ** psitau;
+		psitau = (double **) malloc(MM * sizeof(double *));
+		for (i=0; i < MM; i++)
+			psitau[i] = (double *) malloc(MM * sizeof(double));
+
+		float ** xxtau;
+		xxtau = (float **) malloc(MM * sizeof(float *));
+		for (i=0; i < MM; i++)
+			xxtau[i] = (float *) malloc(MM * sizeof(float));
+
+		float ** yytau;
+		yytau = (float **) malloc(MM * sizeof(float *));
+		for (i=0; i < M; i++)
+			yytau[i] = (float *) malloc(M * sizeof(float));
+
+		perfil_imaginario(dperfil);
+
+		meshgrid_imaginario(xxtau, yytau, tt);
+
+		printf("puta\n");
+
+		calculo_flujo_imaginario(tt, psitau, dperfil, dflujo);
+
+		arregla_malla(tt, dperfil);
+
+		nueva_malla(xxtau, yytau, tt);	
+
+		imprimir_todo(xxtau, yytau, psitau);
+
 		plotfp(opf);
 	}
 
@@ -1431,7 +1486,7 @@ int menu(int control, float * dperfil, float * opc, float * opp, float * opf)
 	if (control==0)
 	{
 		printf("\033[32m************************************************************************\n");
-		printf("CHMYukovski\n\nBienvenido al programa.\nElija la opción que desea ejecutar:\n\n1. Construcción del perfil del ala\n2. Flujo en el perfil\n3. Opciones\n4. Salir\n");
+		printf("CHMYukovski\n\nBienvenido al programa.\nElija la opción que desea ejecutar:\n\n1. Construcción del perfil del ala\n2. Calculo del flujo\n3. Opciones\n4. Salir\n");
 		printf("\033[32m************************************************************************");
 		printf("\033[0m\n");	
 	}
