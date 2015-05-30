@@ -254,7 +254,7 @@ int limites(float * dperfil)
 			}
 		}
 	}
-}
+
 
 /* Devuelve matriz nx2 con todos los puntos de la circunferencia */
 int matriz_circunferencia(float * dperfil, float ** circunferencia)
@@ -305,6 +305,7 @@ int imprimir_circunferencia(float ** circunferencia)
 	return 0;
 }
 
+
 /* Plotea los puntos de la circunferencia */
 int plotc(float * dperfil, float * opc)
 {
@@ -344,6 +345,7 @@ int plotc(float * dperfil, float * opc)
 	return 0;
 }
 
+
 /* Aplica la transformación de Yukovski a cada punto de la circunferencia */
 int transformacion_yukovski(float * dperfil, float ** circunferencia)
 {
@@ -367,6 +369,7 @@ int transformacion_yukovski(float * dperfil, float ** circunferencia)
 
 	return 0;
 }
+
 
 /* Copian en un archivo .dat una lista de puntos (matriz nx2) para imprimir en GNU Plot */
 int imprimir_perfil(float ** perfil)
@@ -394,6 +397,7 @@ int imprimir_perfil(float ** perfil)
 
 	return 0;
 }
+
 
 /* Plotea los puntos transformados para el perfil */
 int plotp (float * dperfil, float ** circunferencia, float * opp)
@@ -458,6 +462,7 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
 
 	return 0;
 }
+
 
 /* Menú para modificar opciones de plot de circunferencia */
 int menu_circ (float * opc, float * opp, float * opf)
@@ -841,7 +846,6 @@ int perfil(float * dperfil, float * opc, float * opp, float * opf)
 }
 
 
-
 /* Introducción de los datos para el cálculo del flujo */
 int datos_flujo (float *dperfil, float *dflujo)
 {
@@ -1113,7 +1117,6 @@ int meshgrid_imaginario(float ** xx, float ** yy, complex double ** tt)
 
 
 
-
 int calculo_flujo_imaginario(complex double ** tt, double ** psi, float * dperfil)
 {
 	int i,j;
@@ -1170,6 +1173,8 @@ int nueva_malla (float **xxtau, float **yytau, complex double ** tt)
 
 	return 0;
 }
+
+
 /*
 int imprimir_xxtau(float ** matriz)
 {
@@ -1234,6 +1239,8 @@ int imprimir_psitau(double ** matriz)
 }
 */
 
+
+/* Exporta a "puntos_flujo_perfil.dat" para plot en GNU Plot */
 int imprimir_todo(float **xxtau, float **yytau, double **psi)
 {
 	FILE * matriz_archivo;
