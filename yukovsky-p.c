@@ -1012,8 +1012,6 @@ int plotfc (float *opf, float ** psi)
 		parte = parte + (parte / (float) (10));
 	}
 
-	printf("%f-%f-%f \n", psimin, parte, psimax);
-
 	// Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipefc = popen ("gnuplot -pesist","w"); 
 
@@ -1026,6 +1024,32 @@ int plotfc (float *opf, float ** psi)
 	return 0;
 }
 
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+int simetrica_matriz_double(double ** matriz)
+{
+	int i, j;
+
+	float ** copia;
+	copia = (float **) malloc(M * sizeof(float *));
+	for (i=0; i < M; i++)
+		copia[i] = (float *) malloc(M * sizeof(float));
+
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			copia[i][j] = (float) matriz[i][j];
+		}
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			matriz[i][M-1-j] = (double) copia[i][j];
+		}
+
+
+	return 0;
+}
 
 /* Copian en un archivo .dat una lista de puntos (matriz nx2) para imprimir en GNU Plot */
 int imprimir_perfil_imaginario(double ** circunferencia)
@@ -1096,7 +1120,6 @@ int perfil_imaginario(float * dperfil)
 		circunferencia[i][1] = cimag(t0) + (double) dperfil[2] * sin(valores_t[i]);
 	}
 
-
 	complex double * circunferencia_compleja;
 	circunferencia_compleja = (complex double *) malloc(N * sizeof(complex double));
 
@@ -1114,13 +1137,12 @@ int perfil_imaginario(float * dperfil)
 		circunferencia[i][1] = cimag(circunferencia_compleja[i]);
 	}
 
+	simetrica_matriz_double(circunferencia);
 
 	imprimir_perfil_imaginario(circunferencia);
 
-
 	return 0;
 }
-
 
 int meshgrid_imaginario(float ** xx, float ** yy, complex double ** tt)
 {
@@ -1136,6 +1158,7 @@ int meshgrid_imaginario(float ** xx, float ** yy, complex double ** tt)
 	rangoy = (float *) malloc(MM * sizeof(float));
 
 	linspace(rangox, -xmax, xmax, MM);
+
 	linspace(rangoy, -ymax, ymax, MM);
 
 	for (i = 0; i < MM; i++)
@@ -1144,21 +1167,19 @@ int meshgrid_imaginario(float ** xx, float ** yy, complex double ** tt)
 	}
 
 	for (i = 0; i < MM; i++)
-		for (j = 0; j < M; j++)
+		for (j = 0; j < MM; j++)
 		{
 			yy[i][j] = rangoy[i];
 		}
 
 	for (i = 0; i < MM; i++)
-		for (j = 0; j < M; j++)
+		for (j = 0; j < MM; j++)
 		{
 			tt[i][j] = xx[i][j]+yy[i][j]*I;
 		}
 
 	return(0);
 }	
-
-
 
 int calculo_flujo_imaginario(complex double ** tt, double ** psi, float * dperfil, float * dflujo)
 {
@@ -1178,7 +1199,6 @@ int calculo_flujo_imaginario(complex double ** tt, double ** psi, float * dperfi
 	return 0;
 }
 
-
 int arregla_malla(complex double ** tt, float * dperfil)
 {
 	complex double t0 = dperfil[0] + dperfil[1] * I;
@@ -1194,19 +1214,16 @@ int arregla_malla(complex double ** tt, float * dperfil)
 	return 0;
 }
 
-
-
-int nueva_malla (float ** xxtau, float ** yytau, complex double ** tt)
+int nueva_malla (float * dperfil, float ** xxtau, float ** yytau, complex double ** tt)//TODO QUE POLLAS ES A
 {
 	complex double tau;
-	double a = 1;
 
 	int i, j;
 
 	for (i = 0; i < MM; ++i)
 		for (j = 0; j < MM; ++j)
 		{
-			tau = tt[i][j] + pow(a,2)/tt[i][j];
+			tau = tt[i][j] + pow(dperfil[2],2)/tt[i][j];
 			xxtau[i][j] = creal(tau);
 			yytau[i][j] = cimag(tau);
 		}
@@ -1215,77 +1232,11 @@ int nueva_malla (float ** xxtau, float ** yytau, complex double ** tt)
 	return 0;
 }
 
-
-/*
-int imprimir_xxtau(float ** matriz)
-{
-	FILE * matriz_archivo;
-	matriz_archivo = fopen("xxtau.dat", "w+");
-
-	int i, j;
-
-	for (i = 0; i < M; i++)
-	{
-		for (j = 0; j < M; j++)
-		{
-			fprintf(matriz_archivo, "%f ", matriz[i][j]);
-		}
-
-		fprintf(matriz_archivo, "\n");
-	}
-	
-	return 0;
-}
-
-
-int imprimir_yytau(float ** matriz)
-{
-	FILE * matriz_archivo;
-	matriz_archivo = fopen("yytau.dat", "w+");
-
-	int i, j;
-
-	for (i = 0; i < M; i++)
-	{
-		for (j = 0; j < M; j++)
-		{
-			fprintf(matriz_archivo, "%f ", matriz[i][j]);
-		}
-
-		fprintf(matriz_archivo, "\n");
-	}
-	
-	return 0;
-}
-
-
-int imprimir_psitau(double ** matriz)
-{
-	FILE * matriz_archivo;
-	matriz_archivo = fopen("psitau.dat", "w+");
-
-	int i, j;
-
-	for (i = 0; i < M; i++)
-	{
-		for (j = 0; j < M; j++)
-		{
-			fprintf(matriz_archivo, "%f ", matriz[i][j]);
-		}
-
-		fprintf(matriz_archivo, "\n");
-	}
-	
-	return 0;
-}
-*/
-
-
 /* Exporta a "puntos_flujo_perfil.dat" para plot en GNU Plot */
 int imprimir_todo(float ** xxtau, float ** yytau, double ** psi)
 {
 	FILE * matriz_archivo;
-	matriz_archivo = fopen("puntos_flujo_perfil.dat", "w+");
+	matriz_archivo = fopen("pts_flujo_perfil.dat", "w+");
 
 	int i, j;
 
@@ -1311,15 +1262,16 @@ int plotfp (float * opf)
 	// Tubería UNIX para usar GNU Plot desde el programa
 	FILE *pipefp = popen ("gnuplot -pesist","w"); 
 
-	fprintf(pipefp, "set terminal push \n set terminal unknown \n set table 'temp.dat' \n set view map \n set contour \n set cntrparam level 30 \n unset surface \n unset clabel \n splot 'puntos_flujo_perfil.dat' with lines lc 3 \n unset table \n");
-	fprintf(pipefp, "set terminal pop \n unset key \n set size ratio 0.3 \n plot 'temp.dat' with lines lc 3 lw 2, 'pts_perfil.dat' with filledcurves x1 fs pattern 3 lc 9\n");
+	fprintf(pipefp, "set terminal push \n set terminal unknown \n set table 'temp.dat' \n set view map \n set contour \n set cntrparam level 30 \n unset surface \n unset clabel \n splot 'puntos.dat' with lines lc 3 \n unset table \n");
+	fprintf(pipefp, "set terminal pop \n unset key \n set size ratio 0.3 \n plot 'temp.dat' with lines lc 3 lw 2, 'pts_perfil_imaginario.dat' with filledcurves x1 fs pattern 3 lc 9\n");
 	fprintf(pipefp, "!rm temp.dat\n");
 
-	pclose (pipefp);
+	printf("puta4\n"); //TODO
+
+	printf("puta5\n"); //TODO
 
 	return 0;
 }
-
 
 int flujo(float * dperfil, float * opc, float * opp, float * opf)
 {
@@ -1357,7 +1309,7 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 	}
 	else
 	{
-		printf("\033[32m \n¿Desea dar nuevos valores? (s/n)");
+		printf("\033[32m \n¿Desea dar nuevos valores al cilindro - perfil alar ? (s/n)");
 		printf("\033[0m \n");
 		scanf ("%c", &opcionf);
 
@@ -1433,10 +1385,6 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 		// Datos para el flujo
 		datos_flujo(dperfil, dflujo);
 
-		dperfil[4] = dperfil[2]; // a 
-		dperfil[2] = dperfil[4] * sqrt((pow(1 + dperfil[0],2) + pow(dperfil[1],2))); // R
-
-
 		complex double ** tt;
 		tt = (complex double **) malloc(MM * sizeof(complex double *));
 		for (i=0; i < MM; i++)
@@ -1454,24 +1402,22 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 
 		float ** yytau;
 		yytau = (float **) malloc(MM * sizeof(float *));
-		for (i=0; i < M; i++)
-			yytau[i] = (float *) malloc(M * sizeof(float));
+		for (i=0; i < MM; i++)
+			yytau[i] = (float *) malloc(MM * sizeof(float));
 
 		perfil_imaginario(dperfil);
 
 		meshgrid_imaginario(xxtau, yytau, tt);
 
-		printf("puta\n");
-
 		calculo_flujo_imaginario(tt, psitau, dperfil, dflujo);
 
 		arregla_malla(tt, dperfil);
 
-		nueva_malla(xxtau, yytau, tt);	
+		nueva_malla(dperfil, xxtau, yytau, tt);	
 
 		imprimir_todo(xxtau, yytau, psitau);
 
-		plotfp(opf);
+		plotfc(opf, xxtau);
 	}
 
 	return 0;
