@@ -16,7 +16,7 @@ set table 'temp.dat'
 set view map
 unset surface
 set contour#set cntrparam bspline
-set cntrparam level 75
+set cntrparam level 50
 splot 'putos.dat' with lines lc 3 lw 2
 unset table
 set terminal pop

@@ -3,8 +3,45 @@
 #include <math.h>
 #include <complex.h>
 
+#define N 200 // Número de puntos de la circunferencia
 #define M 50 
 
+/* Introducción de los valores para calcular perfil */
+int datos_perfil(float * dperfil) 
+{
+	printf("\nIntroduzca los valores:\n");
+
+	printf("Xc: "); 
+	scanf ("%f", &dperfil[0]);
+	printf("Yc: ");
+	scanf ("%f", &dperfil[1]);
+	printf("R: ");
+	scanf ("%f", &dperfil[4]);
+
+	// beta
+	dperfil[3] = asin(dperfil[1]/dperfil[2]);
+
+	// b
+	dperfil[2] = dperfil[4] * sqrt((pow(1 + dperfil[0],2) + pow(dperfil[1],2)));
+															 
+	// El caso queda definido al pasar el vector por limites
+	dperfil[5] = 0; // Por ahora
+
+	//Futuros limites dinamicos del ploteo
+	dperfil[6] = dperfil[0] - dperfil[2] - 1; //-X ploteo circunferencia
+	dperfil[7] = dperfil[0] + dperfil[2] + 1; //+X ploteo circunferencia
+	dperfil[8] = dperfil[1] - dperfil[2] - 1; //-Y ploteo circunferencia
+	dperfil[9] = dperfil[1] + dperfil[2] + 1; //+Y ploteo circunferencia
+
+	//Datos dinamicos del ploteo del perfil inicicalizados a cero
+	dperfil[10] = 0; //-X ploteo perfil
+	dperfil[11] = 0; //+X ploteo perfil
+	dperfil[12] = 0; //-Y ploteo perfil
+	dperfil[13] = 0; //+Y ploteo perfil
+	printf("%f\n", dperfil[2]);
+
+	return 0;
+}
 
 // Imprime matriz MxM float
 int imprimir_matriz_float(float ** matriz)
@@ -117,21 +154,21 @@ int meshgrid(float ** xx, float ** yy, complex double ** tt)
 	return(0);
 }	
 
-int calculo_flujo(complex double ** tt, double ** psi)
+int calculo_flujo(complex double ** tt, double ** psi, float * dperfil)
 {
 	int i,j;
 
-	complex double t0 = 0.2 + 0.3 * I;
+	complex double t0; // Centro de la circunferencia
+	t0 =  dperfil[4] * (-dperfil[0] + dperfil[1] * I);
 
-	double T = 3.76991118431; //Valor del flujo
 	double U = 1;
 	double alpha = 0;
-	double R = 1;
-
+	double T = 4 * M_PI * dperfil[4] * U * (dperfil[1] + (1+dperfil[0]) * alpha);
+	printf("%lf\n", T);
 	for (i = 0; i < M; ++i)
 		for (j = 0; j < M; ++j)
 		{
-			psi[i][j] = cimag(U * ((tt[i][j]-t0)*cexp(-alpha*I)+pow(R,2)/(tt[i][j]-t0)*cexp(alpha*I)) + I * T/(2*M_PI)*clog(tt[i][j]-t0));
+			psi[i][j] = cimag(U * ((tt[i][j]-t0)*cexp(-alpha*I)+pow(dperfil[2],2)/(tt[i][j]-t0)*cexp(alpha*I)) + I * T/(2*M_PI)*clog(tt[i][j]-t0));
 		}
 
 	return 0;
@@ -220,9 +257,6 @@ int simetrica_matriz_double(double ** matriz)
 {
 	int i, j;
 
-	printf("Puta1\n");
-
-
 	float ** copia;
 	copia = (float **) malloc(M * sizeof(float *));
 	for (i=0; i < M; i++)
@@ -286,7 +320,6 @@ int imprimir_yytau(float ** matriz)
 }
 
 
-
 int imprimir_psitau(double ** matriz)
 {
 	FILE * matriz_archivo;
@@ -329,105 +362,104 @@ int imprimir_todo(float **xxtau, float **yytau, double **psi)
 	return 0;
 }
 
-int imprimir_todo_izq(float **xxtau, float **yytau, double **psi)
+
+/* Copian en un archivo .dat una lista de puntos (matriz nx2) para imprimir en GNU Plot */
+int imprimir_perfil_imaginario(double ** circunferencia)
 {
-	FILE * matriz_archivo;
-	matriz_archivo = fopen("putos1.dat", "w+");
+	// Apertura del archivo donde se almacenan los puntos de la circunferencia para ser impresos con GNU Plot
+	FILE * file_perfil_imaginario; 
+	file_perfil_imaginario = fopen("pts_perfil_imaginario.dat", "w+");
 
-	int i, j;
-
-	for (i = 0; i < M; i++)
+	if (file_perfil_imaginario == NULL)
 	{
-		for (j = 0; j < M; j++)
-		{
-			if (xxtau[i][j] < -2.54)
-			{
-				fprintf(matriz_archivo, "%f ", xxtau[i][j]);
-				fprintf(matriz_archivo, "%f ", yytau[i][j]);
-				fprintf(matriz_archivo, "%lf \n", psi[i][j]);
-			}
-		}
+		printf("\033[31mError al abrir el archivo\n");
+		printf("\033[0m\n");	
+		return 1;
 	}
+
+	int i;
+
+	for (i=0; i < (N); i++) // Escribe cada punto (fila de la matriz) en el archivo
+	{
+		fprintf(file_perfil_imaginario, "%f %f\n", circunferencia[i][0], circunferencia[i][1]);
+	}
+
+	fprintf(file_perfil_imaginario, "%f %f\n", circunferencia[0][0], circunferencia[0][1]); // Termina con el primer punto (para cerrar el polígono)
+
+	fclose(file_perfil_imaginario); // Cierre del archivo
+
+
+	return 0;
+}
+
+
+int transformacion_yukovski(float * dperfil, complex double * circunferencia_compleja)
+{
+	int i;
+
+	for (i = 0; i < N; ++i)
+	{
+		circunferencia_compleja[i] = circunferencia_compleja[i] + pow(dperfil[4],2)/circunferencia_compleja[i];
+	}
+
 	
 	return 0;
 }
 
-int imprimir_todo_der(float **xxtau, float **yytau, double **psi)
+
+int perfil_imaginario(float * dperfil)
 {
-	FILE * matriz_archivo;
-	matriz_archivo = fopen("putos2.dat", "w+");
+	int i;
 
-	int i, j;
+	double ** circunferencia;
+	circunferencia = (double **) malloc(N * sizeof(double *));
+	for (i=0; i < N; i++)
+		circunferencia[i] = (double *) malloc(N * sizeof(double));
 
-	for (i = 0; i < M; i++)
+	complex double t0; // Centro de la circunferencia
+	t0 =  dperfil[4] * (-dperfil[0] + dperfil[1] * I);
+
+	// Valores de ángulo t para las ecuaciones paramétricas
+	float * valores_t;
+	valores_t = (float *) malloc(N * sizeof(float));
+
+	linspace(valores_t, 0, 2*M_PI, N); // linspace divide uniformemente el intervalo 2*pi en N partes
+
+	// Puntos de la circunferencia
+	for (i = 0; i < N; ++i)
 	{
-		for (j = 0; j < M; j++)
-		{
-			if (xxtau[i][j] > 2.31)
-			{
-				fprintf(matriz_archivo, "%f ", xxtau[i][j]);
-				fprintf(matriz_archivo, "%f ", yytau[i][j]);
-				fprintf(matriz_archivo, "%lf \n", psi[i][j]);
-			}
-		}
+		circunferencia[i][0] = creal(t0) + (double) dperfil[2] * cos(valores_t[i]);
+		circunferencia[i][1] = cimag(t0) + (double) dperfil[2] * sin(valores_t[i]);
 	}
-	
+
+
+	complex double * circunferencia_compleja;
+	circunferencia_compleja = (complex double *) malloc(N * sizeof(complex double));
+
+	// Circunferencia en números complejos
+	for (i = 0; i < N; ++i)
+		circunferencia_compleja[i] = circunferencia[i][0] + circunferencia[i][1] * I;
+
+	// Transformación
+	transformacion_yukovski(dperfil, circunferencia_compleja);
+
+	// Puntos con el perfil
+	for (i = 0; i < N; ++i)
+	{
+		circunferencia[i][0] = creal(circunferencia_compleja[i]);
+		circunferencia[i][1] = cimag(circunferencia_compleja[i]);
+	}
+
+
+	imprimir_perfil_imaginario(circunferencia);
+
+
 	return 0;
 }
 
-int imprimir_todo_deb(float **xxtau, float **yytau, double **psi)
-{
-	FILE * matriz_archivo;
-	matriz_archivo = fopen("putos3.dat", "w+");
 
-	int i, j;
 
-	for (i = 0; i < M; i++)
-	{
-		for (j = 0; j < M; j++)
-		{
-			if (xxtau[i][j] < 2.31 && xxtau[i][j] > -2.54)
-			{
-				if (yytau[i][j] < -0.28)
-				{
-					fprintf(matriz_archivo, "%f ", xxtau[i][j]);
-					fprintf(matriz_archivo, "%f ", yytau[i][j]);
-					fprintf(matriz_archivo, "%lf \n", psi[i][j]);
-				}
-			}
-		}
-	}
-	
-	return 0;
-}
-
-int imprimir_todo_arr(float **xxtau, float **yytau, double **psi)
-{
-	FILE * matriz_archivo;
-	matriz_archivo = fopen("putos4.dat", "w+");
-
-	int i, j;
-
-	for (i = 0; i < M; i++)
-	{
-		for (j = 0; j < M; j++)
-		{
-			if (xxtau[i][j] < 2.31 && xxtau[i][j] > -2.54)
-			{
-				if (yytau[i][j] > 1.35)
-				{
-					fprintf(matriz_archivo, "%f ", xxtau[i][j]);
-					fprintf(matriz_archivo, "%f ", yytau[i][j]);
-					fprintf(matriz_archivo, "%lf \n", psi[i][j]);
-				}
-			}
-		}
-	}
-	
-	return 0;
-}
-
-int flujo(/*float * dperfil ,float * opf*/) // TODO_p: al juntar unir las opciones
+int flujo(float * dperfil /*float * opf*/) // TODO_p: al juntar unir las opciones
 {
 	int i;
 
@@ -461,34 +493,26 @@ int flujo(/*float * dperfil ,float * opf*/) // TODO_p: al juntar unir las opcion
 	for (i=0; i < M; i++)
 		yytau[i] = (float *) malloc(M * sizeof(float));
 
+
+	perfil_imaginario(dperfil);
+
 	meshgrid(xx, yy, tt);
 
-	//imprimir_matriz_compleja(tt);
-
-	calculo_flujo(tt, psi);
-
-	//imprimir_matriz_double(psi);
-
-	//TODO_p npi de porque no me va
-	//imprimir_flujo(xx,yy,psi); 
+	calculo_flujo(tt, psi, dperfil);
 
 	arregla_malla(tt);
 
 	nueva_malla(xxtau, yytau, tt);
 
-	simetrica_matriz(xxtau);
-	simetrica_matriz(yytau);
-	simetrica_matriz_double(psi);
+//	simetrica_matriz(xxtau);
+//	simetrica_matriz(yytau);
+//	simetrica_matriz_double(psi);
 
 	imprimir_xxtau(xxtau);
 	imprimir_yytau(yytau);
 	imprimir_psitau(psi);
 
 	imprimir_todo(xxtau, yytau, psi);
-	imprimir_todo_izq(xxtau, yytau, psi);
-	imprimir_todo_der(xxtau, yytau, psi);
-	imprimir_todo_deb(xxtau, yytau, psi);
-	imprimir_todo_arr(xxtau, yytau, psi);
 
 	return 0;
 }
@@ -496,7 +520,13 @@ int flujo(/*float * dperfil ,float * opf*/) // TODO_p: al juntar unir las opcion
 
 int main(int argc, char const *argv[])
 {
-	flujo();
+	// Vector con los datos del flujo
+	float * dperfil;
+	dperfil = (float *) malloc(14 * sizeof(float)); // Reserva de memoria para el vector
+
+	datos_perfil(dperfil);
+
+	flujo(dperfil);
 
 	return 0;
 }

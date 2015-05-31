@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <complex.h>
+#include <unistd.h>
 
 #define N 200 // Número de puntos de la circunferencia
 #define M 31 // Número de puntos de la malla
+#define Mi 50 // Número de puntos de la malla compleja
 
 // PI queda definido como M_PI al importar math.h
 // #define M_PI 3.14159265358979323846
@@ -11,15 +14,12 @@
 /* Declaración de algunos prototipos */
 int menu(int control, float * dperfil, float * opc, float * opp, float * opf);
 int menu_opciones (float * opc, float * opp, float * opf);
-
 // Con esto evitamos warnings por declaraciones implícitas en funciones que se llaman entre sí
-
 
 
 /*****************/
 /*** FUNCIONES ***/
 /*****************/
-
 
 /* La función devuelve las n divisiones equiespaciadas del intervalo dado */ 
 int linspace(float * vector, float x0, float x, int n)
@@ -40,18 +40,17 @@ int linspace(float * vector, float x0, float x, int n)
 	return 0;
 }
 
-
 /* Toma grados y devuelve radianes */
 float deg2rad(float deg)
 {
 	return(deg*2*M_PI/360);
 }
 
-
 /* Introducción de los valores para calcular perfil */
 int datos_perfil(float * dperfil) 
 {
-	printf("\nIntroduzca los valores:\n");
+	printf("\033[32m \nIntroduzca los valores:");
+	printf("\033[0m\n");
 
 	printf("Xc: "); 
 	scanf ("%f", &dperfil[0]);
@@ -75,15 +74,11 @@ int datos_perfil(float * dperfil)
 	dperfil[8] = dperfil[1] - dperfil[2] - 1; //-Y ploteo circunferencia
 	dperfil[9] = dperfil[1] + dperfil[2] + 1; //+Y ploteo circunferencia
 
-	//Datos dinamicos del ploteo del perfil inicicalizados a cero
-	dperfil[10] = 0; //-X ploteo perfil
-	dperfil[11] = 0; //+X ploteo perfil
-	dperfil[12] = 0; //-Y ploteo perfil
-	dperfil[13] = 0; //+Y ploteo perfil
+	//Radio'''?
+	dperfil[14] = dperfil[2] * sqrt((pow(1 + dperfil[0],2) + pow(dperfil[1],2)));
 
 	return 0;
 }
-
 
 /* Funcion interpolada para  limites cuando --> x<1 && y<1 */
 float f1(float x, float y) 
@@ -93,7 +88,6 @@ float f1(float x, float y)
 	return alim;
 }
 
-
 /* Funcion interpolada para  limites cuando --> x>1 && y<1 */
 float f2(float x, float y) 
 {
@@ -101,7 +95,6 @@ float f2(float x, float y)
 	alim = 0.25 * (5.2 * (x - 1) * (y - 0.0001) + 1.43 * (5 - x) * (y - 0.0001) + 5.1 * (x - 1) * (1 - y) + 1.1 * (5 - x) * (1 - y));
 	return alim;
 }
-
 
 /* Funcion interpolada para  limites cuando --> x<1 && y>1 */
 float f3 (float x, float y) 
@@ -111,7 +104,6 @@ float f3 (float x, float y)
 	return alim;
 }
 
-
 /* Funcion interpolada para  limites cuando --> x>1 && y>1 */
 float f4(float x, float y)
 {
@@ -120,34 +112,40 @@ float f4(float x, float y)
 	return alim;
 }
 
-
 /* Limita el valor de a (radio) para que la transformación sea eficaz */
 int limites(float * dperfil)
 {
-	if (dperfil[0]>50 || dperfil[1]>50 || dperfil[2]>50)
+	if (dperfil[2] > 15)
 	{
-		printf("\033[31mValores muy grandes \n"); 
+		printf("\033[31mRadio muy grande "); 
+		printf("\033[0m\n");	
+		return 0;
+	}
+
+	if (dperfil[0]>6 || dperfil[1]>6 || dperfil[0]<-6 || dperfil[1]<-6) //Limitacion dperfil menos que 6 o mas que -6
+	{
+		printf("\033[31mValores no válidos (-6>Xc>6 || -6>Yc>6)");
 		printf("\033[0m\n");	
 		return 0;
 	}
 
 	if (dperfil[2] <= 0) // El valor del radio siempre tiene que ser mayor que cero
 	{
-		printf("\033[31mValores no válidos (R<=0)\n"); 
+		printf("\033[31mValores no válidos (R<=0)"); 
 		printf("\033[0m\n");	
 		return 0; // 
 	}
 
 	if (dperfil[2] < dperfil[1]) // El valor del radio siempre tiene que ser mayor que el alejamiento del eje y
 	{
-		printf("\033[31mValores no válidos (R<Yc)\n"); 
+		printf("\033[31mValores no válidos (R<Yc)"); 
 		printf("\033[0m\n");	
 		return 0;
 	}
 
 	if (dperfil[0]==0 && dperfil[1]==0) // CASO 1: no planteado 
 	{
-		printf("\033[31mValores no válidos (Xc==0 && Yc==0)\n");
+		printf("\033[31mValores no válidos (Xc==0 && Yc==0)");
 		printf("\033[0m\n");	
 		return 0;
 	}	
@@ -162,7 +160,7 @@ int limites(float * dperfil)
 		}
 		else //Si a<xc o a>xc
 		{
-			printf("\033[31mValores no válidos (R!=Yc)\n"); 
+			printf("\033[31mValores no válidos (R!=Yc)"); 
 			printf("\033[0m\n");	
 			return 0;
 		}	
@@ -179,14 +177,14 @@ int limites(float * dperfil)
 			}
 			else
 			{
-				printf("\033[31mValores no válidos (Xc muy proximo a R)\n"); 
+				printf("\033[31mValores no válidos (Xc muy proximo a R)"); 
 				printf("\033[0m\n");	
 				return 0;	
 			}
 		}
 		else //Si a==xc o a<xc
 		{
-			printf("\033[31mValores no válidos (R<=Xc)\n"); 
+			printf("\033[31mValores no válidos (R<=Xc)"); 
 			printf("\033[0m\n");	
 			return 0;
 		}
@@ -195,84 +193,74 @@ int limites(float * dperfil)
 
 	else //CASO 4
 	{
-		if (dperfil[0]>6 || dperfil[1]>6) //Limitacion dperfil menos que 6
+		if (dperfil[0]<=1)
 		{
-			printf("\033[31mValores no válidos (Xc>6 || Yc>6)\n");
-			printf("\033[0m\n");	
-			return 0;
+			if (dperfil[1]<=1) //xc<1 yc<1 ----> f1
+			{
+				if (f1(dperfil[0],dperfil[1])<=dperfil[2])
+				{
+					//printf("Valores válidos (f1(xc,yc)<=a)\n"); 
+					dperfil[5]=4;
+					return 1;
+				}
+				else
+				{
+					printf("\033[31mValores no válidos (f1(Xc,Yc)>R)"); 
+					printf("\033[0m\n");	
+					return 0;
+				}
+			}
+			else //xc<1 yc>1 ----> f3
+			{
+				if (f3(dperfil[0],dperfil[1])<=dperfil[2])
+				{
+					//printf("Valores válidos (f3(xc,yc)<=a)\n"); 
+					dperfil[5]=4;
+					return 1;
+				}
+				else
+				{
+					printf("\033[31mValores no válidos (f3(Xc,Yc)>R)"); 
+					printf("\033[0m\n");	
+					return 0;
+				}
+			}
 		}
 		else
 		{
-			if (dperfil[0]<=1)
+			if (dperfil[1]<=1) //xc>1 yc<1 ----> f2
 			{
-				if (dperfil[1]<=1) //xc<1 yc<1 ----> f1
+				if (f2(dperfil[0],dperfil[1])<=dperfil[2])
 				{
-					if (f1(dperfil[0],dperfil[1])<=dperfil[2])
-					{
-						//printf("Valores válidos (f1(xc,yc)<=a)\n"); 
-						dperfil[5]=4;
-						return 1;
-					}
-					else
-					{
-						printf("\033[31mValores no válidos (f1(Xc,Yc)>R)\n"); 
-						printf("\033[0m\n");	
-						return 0;
-					}
+					//printf("Valores válidos (f2(xc,yc)<=a)\n"); 
+					dperfil[5]=4;
+					return 1;
 				}
-				else //xc<1 yc>1 ----> f3
+				else
 				{
-					if (f3(dperfil[0],dperfil[1])<=dperfil[2])
-					{
-						//printf("Valores válidos (f3(xc,yc)<=a)\n"); 
-						dperfil[5]=4;
-						return 1;
-					}
-					else
-					{
-						printf("\033[31mValores no válidos (f3(Xc,Yc)>R)\n"); 
-						printf("\033[0m\n");	
-						return 0;
-					}
+					printf("\033[31mValores no válidos (f2(Xc,Yc)>R)"); 
+					printf("\033[0m\n");	
+					return 0;
 				}
 			}
-			else
-			{
-				if (dperfil[1]<=1) //xc>1 yc<1 ----> f2
+			else //xc>1 yc>1 ----> f4
+ 			{
+				if (f4(dperfil[0],dperfil[1])<=dperfil[2] )
 				{
-					if (f2(dperfil[0],dperfil[1])<=dperfil[2])
-					{
-						//printf("Valores válidos (f2(xc,yc)<=a)\n"); 
-						dperfil[5]=4;
-						return 1;
-					}
-					else
-					{
-						printf("\033[31mValores no válidos (f2(Xc,Yc)>R)\n"); 
-						printf("\033[0m\n");	
-						return 0;
-					}
+					//printf("Valores válidos (f4(xc,yc)<=a)\n");
+					dperfil[5]=4;
+					return 1;
 				}
-				else //xc>1 yc>1 ----> f4
- 				{
-					if (f4(dperfil[0],dperfil[1])<=dperfil[2] )
-					{
-						//printf("Valores válidos (f4(xc,yc)<=a)\n");
-						dperfil[5]=4;
-						return 1;
-					}
-					else
-					{
-						printf("\033[31mValores no válidos (f4(Xc,Yc)>R)\n"); 
-						printf("\033[0m\n");	
-						return 0;
-					}
+				else
+				{
+					printf("\033[31mValores no válidos (f4(Xc,Yc)>R)"); 
+					printf("\033[0m\n");	
+					return 0;
 				}
 			}
 		}
 	}
 }
-
 
 /* Devuelve matriz nx2 con todos los puntos de la circunferencia */
 int matriz_circunferencia(float * dperfil, float ** circunferencia)
@@ -285,7 +273,6 @@ int matriz_circunferencia(float * dperfil, float ** circunferencia)
 
 	linspace(valores_t, 0, 2*M_PI, N); // linspace divide uniformemente el intervalo 2*pi en N partes
 
-
 	// Cálculo de cada punto para cada valor de t
 	// Almacenamiento en matriz nx2
 	for (i = 0; i < N; ++i)
@@ -294,10 +281,8 @@ int matriz_circunferencia(float * dperfil, float ** circunferencia)
 		circunferencia[i][1] = dperfil[1] + dperfil[2] * sin(valores_t[i]);
 	}
 
-
 	return 0;
 }
-
 
 /* Copian en un archivo .dat una lista de puntos (matriz nx2) para imprimir en GNU Plot */
 int imprimir_circunferencia(float ** circunferencia)
@@ -321,9 +306,7 @@ int imprimir_circunferencia(float ** circunferencia)
 	}
 
 	fprintf(file_circunferencia, "%f %f\n", circunferencia[0][0], circunferencia[0][1]); // Termina con el primer punto (para cerrar el polígono)
-
 	fclose(file_circunferencia); // Cierre del archivo
-
 
 	return 0;
 }
@@ -356,15 +339,16 @@ int plotc(float * dperfil, float * opc)
 	else if (miny>0 && maxy>0)
 		miny=-5;
 
-
 	// Tubería UNIX para usar GNU Plot desde el programa
-	FILE *pipec = popen ("gnuplot -pesist","w");
+	FILE *pipec = popen ("gnuplot -persistent","w");
 
 	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n"); 
 	fprintf(pipec, "plot [%f:%f] [%f:%f] \"pts_circun.dat\" w filledcurves x1 fs pattern %.0f lc %.0f, \"pts_circun.dat\" pt %.0f ps %f lt %.0f\n", minx, maxx, miny, maxy,  opc[3], opc[4], opc[0], opc[1], opc[2]);
+	fprintf(pipec, "set term pngcairo \n set output \"circulo.png\" \n replot \n exit");
+
+	fflush(pipec);
 
 	pclose (pipec);
-
 
 	return 0;
 }
@@ -390,7 +374,6 @@ int transformacion_yukovski(float * dperfil, float ** circunferencia)
 		circunferencia[i][0] = x * (1+(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
 		circunferencia[i][1] = y * (1-(pow(dperfil[4],2)/(pow(x,2)+pow(y,2))));
 	}
-
 
 	return 0;
 }
@@ -418,9 +401,7 @@ int imprimir_perfil(float ** perfil)
 	}
 
 	fprintf(file_perfil, "%f %f\n", perfil[0][0], perfil[0][1]); // Termina con el primer punto (para cerrar el polígono)
-
 	fclose(file_perfil); // Cierre del archivo
-
 
 	return 0;
 }
@@ -479,13 +460,15 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
 
 
     // Tubería UNIX para usar GNU Plot desde el programa
-	FILE *pipep = popen ("gnuplot -pesist","w"); 
+	FILE *pipep = popen ("gnuplot -persistent","w"); 
 
 	fprintf(pipep, "set size ratio 0.3 \n set nokey \n set xzeroaxis \n set yzeroaxis \n");
 	fprintf(pipep, "plot [%f:%f] [%f:%f] \"pts_perfil.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f, \"pts_perfil.dat\" pt %.0f ps %f lt %.0f\n", menorx, mayorx, menory, mayory, opp[3], opp[4], opp[0], opp[1], opp[2]);
+	fprintf(pipep, "set term pngcairo \n set output \"perfil.png\" \n replot \n exit");
+
+	fflush(pipep);
 
 	pclose (pipep);
-
 
 	return 0;
 }
@@ -533,6 +516,12 @@ int menu_circ (float * opc, float * opp, float * opf)
 
 			opc[1]=ps;  // Introducimos el valor obtenido en el vector
 			printf("\033[0m\n");
+
+			if (ps > 2)
+			{
+				printf("\033[31m Te van a quedar puntos muy grandes!");
+				printf("\033[0m\n");
+			}
 
 			menu_circ (opc, opp, opf); // Se vuelve al menu del circulo
 			break;
@@ -640,6 +629,12 @@ int menu_perfil (float * opc, float * opp, float * opf)
 			opp[1]=ps;  // Introducimos el valor obtenido en el vector
 			printf("\033[0m\n");
 
+			if (ps > 2)
+			{
+				printf("\033[31m Te van a quedar puntos muy grandes!");
+				printf("\033[0m\n");
+			}
+
 			menu_perfil (opc, opp, opf); // Se vuelve al menu del perfil
 			break;
 
@@ -704,7 +699,7 @@ int menu_perfil (float * opc, float * opp, float * opf)
 
 
 /* Menú para modificar opciones de plot del flujo del cilindro */
-int menu_flujo_cil (float * opc, float * opp, float * opfc)
+int menu_flujo (float * opc, float * opp, float * opf)
 {
 	printf("\033[33m   1. Color de flujo \n   2. Tamaño de la linea de flujo\n   3. Color del cilindro \n   4. Salir"); // 1: (l)ine(c)olor flujo   2: (l)ine(w)idth   3:(l)ine(c)olor cilindro  
 	printf("\033[0m\n");
@@ -733,9 +728,9 @@ int menu_flujo_cil (float * opc, float * opp, float * opfc)
 				scanf("%d", &lcc);
 			}
 
-			opfc[0]= (float) lcc;
+			opf[0]= (float) lcc;
 
-			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del flujo
+			menu_flujo (opc, opp, opf); // Se vuelve al menu del flujo
 			break;
 
 		case 2:
@@ -743,11 +738,17 @@ int menu_flujo_cil (float * opc, float * opp, float * opfc)
 			printf("\033[0m ");
 			scanf ("%f", &lw);
 
-			opfc[2]=lw;  // Introducimos el valor obtenido en el vector
+			opf[2]=lw;  // Introducimos el valor obtenido en el vector
 
 			printf("\033[0m\n");
 
-			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del flujo
+			if (lw > 2)
+			{
+				printf("\033[31m Te van a quedar lineas muy gruesas!");
+				printf("\033[0m\n");			
+			}
+
+			menu_flujo (opc, opp, opf); // Se vuelve al menu del flujo
 			break;
 
 		case 3:
@@ -762,14 +763,14 @@ int menu_flujo_cil (float * opc, float * opp, float * opfc)
 				scanf("%d", &lcf);
 			}
 
-			opfc[2]= (float) lcf;
+			opf[2]= (float) lcf;
 
-			menu_flujo_cil (opc, opp, opfc); // Se vuelve al menu del perfil
+			menu_flujo (opc, opp, opf); // Se vuelve al menu del perfil
 			break;
 
 
 		case 4: 
-			menu_opciones(opc, opp, opfc); // Se vuelve al menu de opciones
+			menu_opciones(opc, opp, opf); // Se vuelve al menu de opciones
 			break;
 	}
 
@@ -801,7 +802,7 @@ int menu_opciones (float * opc, float * opp, float * opf)
 			break;
 
 		case 3:
-			menu_flujo_cil(opc, opp, opf); // Menú opciones flujo
+			menu_flujo(opc, opp, opf); // Menú opciones flujo
 			break;
 
 		case 4:
@@ -858,11 +859,11 @@ int perfil(float * dperfil, float * opc, float * opp, float * opf)
 }
 
 
-
 /* Introducción de los datos para el cálculo del flujo */
 int datos_flujo (float *dperfil, float *dflujo)
 {
-	printf("\nIntroduzca los valores:\n");
+	printf("\033[32m \nIntroduzca los valores:");
+	printf("\033[0m\n");
 
 	float U, alpha;
 
@@ -871,7 +872,8 @@ int datos_flujo (float *dperfil, float *dflujo)
 	scanf ("%f", &U);
 	while (U>=3 || U<=0.9)
 	{
-		printf("Valor no valido:");
+		printf("\033[31mValor no valido:");
+		printf("\033[0m ");
 		scanf ("%f", &U);
 	}
 
@@ -888,9 +890,15 @@ int datos_flujo (float *dperfil, float *dflujo)
 	// Densidad del aire
 	printf("Densidad del aire: ");
 	scanf ("%f", &dflujo[2]);
+	
+	if(dflujo[2] > 3)
+	{
+		printf("\033[31mEstás en un atmosfera muy densa!");
+		printf("\033[0m\n \n");
+	}
 
 	// Corriente T
-	dflujo[3] = 4 * M_PI * dperfil[4] * dflujo[0] * sin(dflujo[1]);
+	dflujo[3] = 4 * M_PI * dperfil[4] * U * (dperfil[1] + (1+dperfil[0]) * dflujo[1]);
 
 	//Coeficiente de sustentación CL
 	dflujo[4] = 2*M_PI*sin(dflujo[1]+dperfil[3]);
@@ -908,7 +916,7 @@ int meshgrid(float ** xx, float ** yy, float *dperfil)
 	float * rango;
 	rango = (float *) malloc(M * sizeof(float));
 
-	linspace(rango, dperfil[6]-2, dperfil[7]+2, M); // Toma las dimensiones de la malla en función de la dimensión del perfil
+	linspace(rango, dperfil[6]-dperfil[2], dperfil[7]+dperfil[2], M); // Toma las dimensiones de la malla en función de la dimensión del cilindro
 
 	for (i = 0; i < M; i++)
 	{
@@ -920,7 +928,6 @@ int meshgrid(float ** xx, float ** yy, float *dperfil)
 		{
 			yy[i][j] = rango[i];
 		}
-
 
 	return 0;
 }	
@@ -963,7 +970,8 @@ int imprimir_flujo(float ** xx, float ** yy, float ** psi)
 
 	if (file_flujo_cilindro == NULL)
 	{
-		printf("Error al abrir el archivo\n");
+		printf("\033[31m Error al abrir el archivo\n");
+		printf("\033[0m\n");
 		return(0);
 	}
 
@@ -982,13 +990,43 @@ int imprimir_flujo(float ** xx, float ** yy, float ** psi)
 
 
 /* Plotea el flujo del cilindro */
-int plotfc (float *opfc)
+int plotfc (float *opf, float ** psi)
 {
-	// Tubería UNIX para usar GNU Plot desde el programa
-	FILE *pipefc = popen ("gnuplot -pesist","w"); 
+	int i, j;
 
-	fprintf(pipefc, "set terminal push\n set terminal unknown\n set table 'temp.dat'\n set dgrid3d 31,31\n set view map\n unset surface\n set contour\n set cntrparam bspline\n set cntrparam levels incr -10,0.3,10\n splot 'pts_flujo_cilindro.dat' using 1:2:3 with lines\n unset table\n unset dgrid3d\n unset key\n set terminal pop\n");
-	fprintf(pipefc, "set size ratio 1\n plot 'temp.dat' with lines lc %.0f lw %f, 'pts_circun.dat' with filledcurves x1 fs pattern 3 lc %.0f\n !rm temp.dat\n", opfc[0], opfc[1], opfc[2]);
+	float parte = 0;
+	float psimax = 0;
+	float psimin = 0;
+
+	for (i = 0; i < M; ++i)
+		for (j = 0; j < M; ++j)
+		{
+			if (psi[i][j] > psimax)
+				psimax = psi[i][j];
+
+			if (psi[i][j] < psimin)
+				psimin = psi [i][j];
+		}
+
+	parte = ((psimax - psimin)/200); // Intervalo
+
+	if (psimin+100*parte < parte)
+	{
+		parte = parte + (parte / (float) (10));
+	}
+
+	if (psimin+100*parte > parte)
+	{
+		parte = parte + (parte / (float) (10));
+	}
+
+	// Tubería UNIX para usar GNU Plot desde el programa
+	FILE *pipefc = popen ("gnuplot -persistent","w"); 
+
+	fprintf(pipefc, "set terminal push\n set terminal unknown\n set table 'temp.dat'\n set dgrid3d 31,31\n set view map\n unset surface\n set contour\n set cntrparam bspline\n set cntrparam levels incr %f,%f,%f\n splot 'pts_flujo_cilindro.dat' using 1:2:3 with lines\n unset table\n unset dgrid3d\n unset key\n set terminal pop\n", psimin, parte, psimax);
+	fprintf(pipefc, "set size ratio 1\n plot 'temp.dat' with lines lc %.0f lw %f, 'pts_circun.dat' with filledcurves x1 fs pattern 3 lc %.0f\n !rm temp.dat\n", opf[0], opf[1], opf[2]);
+
+	fflush(pipefc);
 
 	pclose (pipefc);
 
@@ -996,11 +1034,270 @@ int plotfc (float *opfc)
 	return 0;
 }
 
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+int transformacion_yukovski_imaginario(float * dperfil, complex double * circunferencia_compleja)
+{
+	int i;
+
+	for (i = 0; i < N; ++i)
+	{
+		circunferencia_compleja[i] = circunferencia_compleja[i] + pow(dperfil[2],2)/circunferencia_compleja[i];
+	}
+
+	
+	return 0;
+}
+
+/* Copian en un archivo .dat una lista de puntos (matriz nx2) para imprimir en GNU Plot */
+int imprimir_perfil_imaginario(double ** circunferenciapr)
+{
+	// Apertura del archivo donde se almacenan los puntos de la circunferenciapr para ser impresos con GNU Plot
+	FILE * file_perfil_imaginario; 
+	file_perfil_imaginario = fopen("pts_perfil_imaginario.dat", "w+");
+
+	if (file_perfil_imaginario == NULL)
+	{
+		printf("\033[31mError al abrir el archivo\n");
+		printf("\033[0m\n");	
+		return 1;
+	}
+
+	int i;
+
+	for (i=0; i < (N); i++) // Escribe cada punto (fila de la matriz) en el archivo
+	{
+		fprintf(file_perfil_imaginario, "%f %f\n", circunferenciapr[i][0], circunferenciapr[i][1]);
+	}
+
+	fprintf(file_perfil_imaginario, "%f %f\n", circunferenciapr[0][0], circunferenciapr[0][1]); // Termina con el primer punto (para cerrar el polígono)
+
+	fclose(file_perfil_imaginario); // Cierre del archivo
+
+
+	return 0;
+}
+
+int perfil_imaginario(float * dperfil)
+{
+	int i;
+
+	double ** circunferenciapr;
+	circunferenciapr = (double **) malloc(N * sizeof(double *));
+	for (i=0; i < N; i++)
+		circunferenciapr[i] = (double *) malloc(N * sizeof(double));
+
+	complex double t0; // Centro de la circunferenciapr
+	t0 =  dperfil[2] * (-dperfil[0] + dperfil[1] * I);
+
+	// Valores de ángulo t para las ecuaciones paramétricas
+	float * valores_t;
+	valores_t = (float *) malloc(N * sizeof(float));
+
+	linspace(valores_t, 0, 2*M_PI, N); // linspace divide uniformemente el intervalo 2*pi en N partes
+
+	// Puntos de la circunferenciapr
+	for (i = 0; i < N; ++i)
+	{
+		circunferenciapr[i][0] = creal(t0) + (double) dperfil[14] * cos(valores_t[i]);
+		circunferenciapr[i][1] = cimag(t0) + (double) dperfil[14] * sin(valores_t[i]);
+	}
+
+
+	complex double * circunferencia_compleja;
+	circunferencia_compleja = (complex double *) malloc(N * sizeof(complex double));
+
+	// circunferenciapr en números complejos
+	for (i = 0; i < N; ++i)
+		circunferencia_compleja[i] = circunferenciapr[i][0] + circunferenciapr[i][1] * I;
+
+	// Transforxxtauión
+	transformacion_yukovski_imaginario(dperfil, circunferencia_compleja);
+
+	// Puntos con el perfil
+	for (i = 0; i < N; ++i)
+	{
+		circunferenciapr[i][0] = creal(circunferencia_compleja[i]);
+		circunferenciapr[i][1] = cimag(circunferencia_compleja[i]);
+	}
+
+
+	imprimir_perfil_imaginario(circunferenciapr);
+
+
+	return 0;
+}
+
+int meshgrid_imaginario(float ** xxpr, float ** yypr, complex double ** tt, float * dperfil)
+{
+	int i, j;
+
+	int xmax = -dperfil[6]+dperfil[7]+3*dperfil[2];
+	int ymax = -dperfil[8]+dperfil[9]+0*dperfil[2];
+
+	float * rangox;
+	rangox = (float *) malloc(Mi * sizeof(float));
+
+	float * rangoy;
+	rangoy = (float *) malloc(Mi * sizeof(float));
+
+	linspace(rangox, -xmax, xmax, Mi);
+	linspace(rangoy, -ymax, ymax, Mi);
+
+	for (i = 0; i < Mi; i++)
+	{
+		xxpr[i] = rangox;
+	}
+
+	for (i = 0; i < Mi; i++)
+		for (j = 0; j < Mi; j++)
+		{
+			yypr[i][j] = rangoy[i];
+		}
+
+	for (i = 0; i < Mi; i++)
+		for (j = 0; j < Mi; j++)
+		{
+			tt[i][j] = xxpr[i][j]+yypr[i][j]*I;
+		}
+
+	return(0);
+}	
+
+int calculo_flujo_imaginario(complex double ** tt, double ** psipr, float * dperfil)
+{
+	int i,j;
+
+	complex double t0; // Centro de la circunferenciapr
+	t0 =  dperfil[2] * (-dperfil[0] + dperfil[1] * I);
+
+	double U = 1;
+	double alpha = 0;
+	double T = 4 * M_PI * dperfil[2] * U * (dperfil[1] + (1+dperfil[0]) * alpha);
+	printf("%lf\n", T);
+	for (i = 0; i < Mi; ++i)
+		for (j = 0; j < Mi; ++j)
+		{
+			psipr[i][j] = cimag(U * ((tt[i][j]-t0)*cexp(-alpha*I)+pow(dperfil[14],2)/(tt[i][j]-t0)*cexp(alpha*I)) + I * T/(2*M_PI)*clog(tt[i][j]-t0));
+		}
+
+	return 0;
+}
+
+int arregla_malla(complex double **tt, float * dperfil)
+{
+	complex double t0 = 0.2 + 0.3 * I;
+
+	int i, j;
+	for (i = 0; i < Mi; ++i)
+		for (j = 0; j < Mi; ++j)
+		{
+			if (cabs(tt[i][j]-t0) < 0.95 * dperfil[2])
+				tt[i][j]=0;
+		}
+
+	return 0;
+}
+
+int nueva_malla (float **xxtau, float **yytau, complex double ** tt, float *dperfil)
+{
+	complex double tau;
+
+	int i, j;
+
+	for (i = 0; i < Mi; ++i)
+		for (j = 0; j < Mi; ++j)
+		{
+			tau = tt[i][j] + pow(dperfil[2],2)/tt[i][j];
+			xxtau[i][j] = creal(tau);
+			yytau[i][j] = cimag(tau);
+		}
+
+	return 0;
+}
+
+int imprimir_flujo_perfil(float **xxtau, float **yytau, double **psipr)
+{
+	FILE * matriz_archivo;
+	matriz_archivo = fopen("pts_flujo_perfil.dat", "w+");
+
+	int i, j;
+
+	for (j = 0; j < Mi; j++)
+	{
+		for (i = 0; i < Mi; i++)
+		{
+			fprintf(matriz_archivo, "%f ", xxtau[i][j]);
+			fprintf(matriz_archivo, "%f ", yytau[i][j]);
+			fprintf(matriz_archivo, "%lf \n", psipr[i][j]);
+		}
+
+		fprintf(matriz_archivo, "\n");
+	}
+	
+	return 0;
+}
+
+int plotfp (double **psipr, float *opf)
+{
+	int i, j;
+
+	float parte = 0;
+	float psiprmax = 0;
+	float psiprmin = 0;
+
+	for (i = 0; i < Mi; ++i)
+		for (j = 0; j < Mi; ++j)
+		{
+			if (psipr[i][j] > psiprmax)
+				psiprmax = psipr[i][j];
+
+			if (psipr[i][j] < psiprmin)
+				psiprmin = psipr [i][j];
+		}
+
+	parte = ((psiprmax - psiprmin)/200); // Intervalo
+
+	if ((psiprmin+100*parte) - parte < 0.1)
+		parte += 0.05;
+
+	if ((psiprmin+100*parte) - parte > 0.1)
+		parte += 0.05;
+
+	// Tubería UNIX para usar GNU Plot desde el programa
+	FILE *pipefp = popen ("gnuplot -persistent","w"); 
+
+	fprintf(pipefp, "set terminal push \n set terminal unknown \n set table 'temp.dat' \n set view map \n set contour \n set cntrparam levels incr %f,%f,%f \n unset surface \n unset clabel \n splot 'pts_flujo_perfil.dat' with lines lc 3 \n unset table \n set terminal pop \n unset key \n set size ratio 0.3 \n plot 'temp.dat' with lines lc 3 lw 2, 'pts_perfil_imaginario.dat' with filledcurves x1 fs pattern 3 lc 9\n !rm temp.dat\n", psiprmin, parte, psiprmax);
+
+	return 0;
+}
+
+int limites_imaginario(float *dperfil)
+{
+	if (limites(dperfil)==0)
+		return 0;
+
+	if (dperfil[0]<=0)
+	{
+		printf("\033[31mValores no válidos (Xc<=0)"); 
+		printf("\033[0m\n");	
+		return 0;
+	}
+
+	if (dperfil[0]<0)
+	{
+		printf("\033[31mValores no válidos (Yc<0)"); 
+		printf("\033[0m\n");	
+		return 0;
+	}
+
+	return 1;
+}
 
 int flujo(float * dperfil, float * opc, float * opp, float * opf)
 {
 	int i;
 	char opcionf, opcion;
+	int mct;
 
 	// Vector con los datos del flujo
 	float * dflujo;
@@ -1009,83 +1306,148 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 	// Matriz Nx2 que almacenará los puntos de la circunferencia
 	float ** circunferencia;
 	circunferencia = (float **) malloc(N * sizeof(float *)); // Reserva de memoria para cada vector
-
 	for (i=0; i < N; i++)
 	{
 		circunferencia[i] = (float *) malloc(2 * sizeof(float)); // Reserva de memoria para las dos coordenadas del vector
 	}
 
+	printf("\033[32m \n1. Obtención del flujo a traves del cilindro (Th. Kutta-Yukovski)\n2. Obtención del flujo a traves del perfil alar");
+	printf("\033[0m \n");
+
+	do
+	{
+		scanf ("%d", &mct);
+	} while((mct != 1) && (mct != 2));
+
 	// Datos del cilindro
-	if (dperfil[2]==0) // Si no se han dado los datos del cilindro 
+	if (dperfil[2]==0) // Si no se han dado los datos del cilindro el radio sera 0
 	{
 		do
 		{
 			datos_perfil(dperfil);
-		} while (limites(dperfil) == 0);
+		} while (limites_imaginario(dperfil) == 0);
 	}
 	else
 	{
-		printf("\n¿Desea dar nuevos valores al cilindro? (s/n)\n");
+		printf("\033[32m \n¿Desea dar nuevos valores al cilindro - perfil alar ? (s/n)");
+		printf("\033[0m \n");
 		scanf ("%c", &opcionf);
-		scanf ("%c", &opcion);
+
+		do
+		{
+			scanf ("%c", &opcion);
+		} while (opcion != 's' && opcion !=  'n');
+
 		if (opcion == 's')
 		{
 			do
 			{
 				datos_perfil(dperfil);
-			} while (limites(dperfil) == 0);
+			} while (limites_imaginario(dperfil) == 0);
 		}
 	}
 
-	// Datos para el flujo
-	datos_flujo(dperfil, dflujo);
-
-	// Calcula los puntos de la circunferencia
-	matriz_circunferencia(dperfil, circunferencia);
-
-	// Guarda los puntos de la circunferencia en el archivo pts_circunferencia.dat
-	if (imprimir_circunferencia(circunferencia)) // Si la apertura falla vuelve al menú
-				menu(0, dperfil, opc, opp, opf);
-
-	// Array para las coordenadas x de la malla
-	float ** xx;
-	xx = (float **) malloc(M * sizeof(float *));
-
-	for (i=0; i < N; i++)
-		xx[i] = (float *) malloc(M * sizeof(float));
-
-	// Array para las coordendas y de la malla
-	float ** yy;
-	yy = (float **) malloc(M * sizeof(float *));
-
-	for (i=0; i < N; i++)
-		yy[i] = (float *) malloc(M * sizeof(float));
-
-	// Array para el flujo en cada punto de la malla
-	float ** psi;
-	psi = (float **) malloc(M * sizeof(float *));
-
-	for (i=0; i < N; i++)
-		psi[i] = (float *) malloc(M * sizeof(float));
-
-	// Crea la malla en la que calcularemos el flujo
-	meshgrid(xx, yy, dperfil);
-
-	// Calcula el flujo en cada punto de la malla para el cilindro
-	calculo_flujo(dperfil, dflujo, xx, yy, psi);
-
-	// Exporta puntos para imprimir el flujo en el cilindro con GNU Plot
-	imprimir_flujo(xx, yy, psi);
-
-	printf("\n");
-	if (dflujo[3] != 0)
+	if (mct == 1)
 	{
-		printf("\nFlujo: %f\n", dflujo[3]);
+		// Datos para el flujo
+		datos_flujo(dperfil, dflujo);
+
+		// Calcula los puntos de la circunferencia
+		matriz_circunferencia(dperfil, circunferencia);
+
+		// Guarda los puntos de la circunferencia en el archivo pts_circunferencia.dat
+		if (imprimir_circunferencia(circunferencia)) // Si la apertura falla vuelve al menú
+					menu(0, dperfil, opc, opp, opf);
+
+		// Array para las coordenadas x de la malla
+		float ** xx;
+		xx = (float **) malloc(M * sizeof(float *));
+		for (i=0; i < M; i++)
+			xx[i] = (float *) malloc(M * sizeof(float));
+
+		// Array para las coordendas y de la malla
+		float ** yy;
+		yy = (float **) malloc(M * sizeof(float *));
+		for (i=0; i < M; i++)
+			yy[i] = (float *) malloc(M * sizeof(float));
+
+		// Array para el flujo en cada punto de la malla
+		float ** psi;
+		psi = (float **) malloc(M * sizeof(float *));
+		for (i=0; i < M; i++)
+			psi[i] = (float *) malloc(M * sizeof(float));
+
+		// Crea la malla en la que calcularemos el flujo
+		meshgrid(xx, yy, dperfil);
+
+		// Calcula el flujo en cada punto de la malla para el cilindro
+		calculo_flujo(dperfil, dflujo, xx, yy, psi);
+
+		// Exporta puntos para imprimir el flujo en el cilindro con GNU Plot
+		imprimir_flujo(xx, yy, psi);
+
+		if (dflujo[3] != 0)
+		{
+			printf("\n\033[32mFlujo: ");
+			printf("\033[0m %f\n", fabsf(dflujo[3]));
+		}
+
+		printf("\033[32mCoeficiente de sustentación:"); 
+		printf("\033[0m %f\n", fabsf(dflujo[4]));
+
+		plotfc(opf, psi);
 	}
-	printf("Coeficiente de sustentación: %lf\n", fabsf(dflujo[4])); 
 
-	plotfc(opf);
+	/* CAMBIAN */
 
+	if (mct == 2)
+	{
+		int i;
+
+		float ** xxpr;
+		xxpr = (float **) malloc(Mi * sizeof(float *));
+		for (i=0; i < Mi; i++)
+			xxpr[i] = (float *) malloc(Mi * sizeof(float));
+
+		float ** yypr;
+		yypr = (float **) malloc(Mi * sizeof(float *));
+		for (i=0; i < Mi; i++)
+			yypr[i] = (float *) malloc(Mi * sizeof(float));
+
+		complex double ** tt;
+		tt = (complex double **) malloc(Mi * sizeof(complex double *));
+		for (i=0; i < Mi; i++)
+			tt[i] = (complex double *) malloc(Mi * sizeof(complex double));
+
+		double ** psipr;
+		psipr = (double **) malloc(Mi * sizeof(double *));
+		for (i=0; i < Mi; i++)
+			psipr[i] = (double *) malloc(Mi * sizeof(double));
+
+		float ** xxtau;
+		xxtau = (float **) malloc(Mi * sizeof(float *));
+		for (i=0; i < Mi; i++)
+			xxtau[i] = (float *) malloc(Mi * sizeof(float));
+
+		float ** yytau;
+		yytau = (float **) malloc(Mi * sizeof(float *));
+		for (i=0; i < Mi; i++)
+			yytau[i] = (float *) malloc(Mi * sizeof(float));
+
+		perfil_imaginario(dperfil);
+
+		meshgrid_imaginario(xxpr, yypr, tt, dperfil);
+
+		calculo_flujo_imaginario(tt, psipr, dperfil);
+
+		arregla_malla(tt, dperfil);
+
+		nueva_malla(xxtau, yytau, tt, dperfil);
+
+		imprimir_flujo_perfil(xxtau, yytau, psipr);
+
+		plotfp(psipr, opf);
+	}
 
 	return 0;
 }
@@ -1099,7 +1461,7 @@ int menu(int control, float * dperfil, float * opc, float * opp, float * opf)
 	if (control==0)
 	{
 		printf("\033[32m************************************************************************\n");
-		printf("Bienvenido al programa.\nElija la opción que desea ejecutar:\n\n1. Construcción del perfil del ala\n2. Flujo en el perfil\n3. Opciones\n4. Salir\n");
+		printf("CHMYukovski\n\nBienvenido al programa.\nElija la opción que desea ejecutar:\n\n1. Construcción del perfil del ala\n2. Calculo del flujo\n3. Opciones\n4. Salir\n");
 		printf("\033[32m************************************************************************");
 		printf("\033[0m\n");	
 	}
@@ -1147,7 +1509,7 @@ int main(int argc, char const *argv[])
  {
 	// Vector con los datos del perfil {Xc, Yc, a, beta, b, caso}
 	float * dperfil;
-	dperfil = (float *) malloc(13 * sizeof(float)); // Reserva de memoria para el vector
+	dperfil = (float *) malloc(15 * sizeof(float)); // Reserva de memoria para el vector
 	dperfil[0] = 0;
 	dperfil[1] = 0;
 	dperfil[2] = 0;
@@ -1176,7 +1538,7 @@ int main(int argc, char const *argv[])
 	float * opf; 
 	opf = (float *) malloc(3 * sizeof(float));
 	opf[0] = 3;
-	opf[1] = 1.5;
+	opf[1] = 1;
 	opf[2] = 9;
 
 	// Primera llamada al menú
