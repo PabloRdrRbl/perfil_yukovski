@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <complex.h>
+#include <unistd.h>
 
 #define N 200 // Número de puntos de la circunferencia
 #define M 31 // Número de puntos de la malla
@@ -339,11 +340,13 @@ int plotc(float * dperfil, float * opc)
 		miny=-5;
 
 	// Tubería UNIX para usar GNU Plot desde el programa
-	FILE *pipec = popen ("gnuplot -pesist","w");
+	FILE *pipec = popen ("gnuplot -persistent","w");
 
 	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n"); 
 	fprintf(pipec, "plot [%f:%f] [%f:%f] \"pts_circun.dat\" w filledcurves x1 fs pattern %.0f lc %.0f, \"pts_circun.dat\" pt %.0f ps %f lt %.0f\n", minx, maxx, miny, maxy,  opc[3], opc[4], opc[0], opc[1], opc[2]);
 	fprintf(pipec, "set term pngcairo \n set output \"circulo.png\" \n replot \n exit");
+
+	fflush(pipec);
 
 	pclose (pipec);
 
@@ -457,11 +460,13 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
 
 
     // Tubería UNIX para usar GNU Plot desde el programa
-	FILE *pipep = popen ("gnuplot -pesist","w"); 
+	FILE *pipep = popen ("gnuplot -persistent","w"); 
 
 	fprintf(pipep, "set size ratio 0.3 \n set nokey \n set xzeroaxis \n set yzeroaxis \n");
 	fprintf(pipep, "plot [%f:%f] [%f:%f] \"pts_perfil.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f, \"pts_perfil.dat\" pt %.0f ps %f lt %.0f\n", menorx, mayorx, menory, mayory, opp[3], opp[4], opp[0], opp[1], opp[2]);
 	fprintf(pipep, "set term pngcairo \n set output \"perfil.png\" \n replot \n exit");
+
+	fflush(pipep);
 
 	pclose (pipep);
 
@@ -1016,10 +1021,12 @@ int plotfc (float *opf, float ** psi)
 	}
 
 	// Tubería UNIX para usar GNU Plot desde el programa
-	FILE *pipefc = popen ("gnuplot -pesist","w"); 
+	FILE *pipefc = popen ("gnuplot -persistent","w"); 
 
 	fprintf(pipefc, "set terminal push\n set terminal unknown\n set table 'temp.dat'\n set dgrid3d 31,31\n set view map\n unset surface\n set contour\n set cntrparam bspline\n set cntrparam levels incr %f,%f,%f\n splot 'pts_flujo_cilindro.dat' using 1:2:3 with lines\n unset table\n unset dgrid3d\n unset key\n set terminal pop\n", psimin, parte, psimax);
 	fprintf(pipefc, "set size ratio 1\n plot 'temp.dat' with lines lc %.0f lw %f, 'pts_circun.dat' with filledcurves x1 fs pattern 3 lc %.0f\n !rm temp.dat\n", opf[0], opf[1], opf[2]);
+
+	fflush(pipefc);
 
 	pclose (pipefc);
 
@@ -1184,7 +1191,7 @@ int arregla_malla(complex double **tt, float * dperfil)
 	for (i = 0; i < Mi; ++i)
 		for (j = 0; j < Mi; ++j)
 		{
-			if (cabs(tt[i][j]-t0) < 1 * dperfil[2])
+			if (cabs(tt[i][j]-t0) < 0.95 * dperfil[2])
 				tt[i][j]=0;
 		}
 
@@ -1211,7 +1218,7 @@ int nueva_malla (float **xxtau, float **yytau, complex double ** tt, float *dper
 int imprimir_flujo_perfil(float **xxtau, float **yytau, double **psipr)
 {
 	FILE * matriz_archivo;
-	matriz_archivo = fopen("putos.dat", "w+");
+	matriz_archivo = fopen("pts_flujo_perfil.dat", "w+");
 
 	int i, j;
 
@@ -1230,7 +1237,7 @@ int imprimir_flujo_perfil(float **xxtau, float **yytau, double **psipr)
 	return 0;
 }
 
-int plotfp (double **psipr)
+int plotfp (double **psipr, float *opf)
 {
 	int i, j;
 
@@ -1256,18 +1263,34 @@ int plotfp (double **psipr)
 	if ((psiprmin+100*parte) - parte > 0.1)
 		parte += 0.05;
 
-	printf("%f/%f/%f\n", psiprmin, parte, psiprmax); //TODO
-
-	parte = 0.6;
-
 	// Tubería UNIX para usar GNU Plot desde el programa
-	FILE *pipefp = popen ("gnuplot -pesist","w"); 
+	FILE *pipefp = popen ("gnuplot -persistent","w"); 
 
-	fprintf(pipefp, "set terminal push \n set terminal unknown \n set table 'temp.dat' \n set view map \n set contour \n set cntrparam levels incr %f,%f,%f \n unset surface \n unset clabel \n splot 'putos.dat' with lines lc 3 \n unset table \n", psiprmin, parte, psiprmax);
-	fprintf(pipefp, "set terminal pop \n unset key \n set size ratio 0.3 \n plot 'temp.dat' with lines lc 3 lw 2, 'pts_perfil_imaginario.dat' with filledcurves x1 fs pattern 3 lc 9\n");
-	fprintf(pipefp, "!rm temp.dat\n");
+	fprintf(pipefp, "set terminal push \n set terminal unknown \n set table 'temp.dat' \n set view map \n set contour \n set cntrparam levels incr %f,%f,%f \n unset surface \n unset clabel \n splot 'pts_flujo_perfil.dat' with lines lc 3 \n unset table \n set terminal pop \n unset key \n set size ratio 0.3 \n plot 'temp.dat' with lines lc 3 lw 2, 'pts_perfil_imaginario.dat' with filledcurves x1 fs pattern 3 lc 9\n !rm temp.dat\n", psiprmin, parte, psiprmax);
 
 	return 0;
+}
+
+int limites_imaginario(float *dperfil)
+{
+	if (limites(dperfil)==0)
+		return 0;
+
+	if (dperfil[0]<=0)
+	{
+		printf("\033[31mValores no válidos (Xc<=0)"); 
+		printf("\033[0m\n");	
+		return 0;
+	}
+
+	if (dperfil[0]<0)
+	{
+		printf("\033[31mValores no válidos (Yc<0)"); 
+		printf("\033[0m\n");	
+		return 0;
+	}
+
+	return 1;
 }
 
 int flujo(float * dperfil, float * opc, float * opp, float * opf)
@@ -1297,12 +1320,12 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 	} while((mct != 1) && (mct != 2));
 
 	// Datos del cilindro
-	if (dperfil[2]==0) // Si no se han dado los datos del cilindro 
+	if (dperfil[2]==0) // Si no se han dado los datos del cilindro el radio sera 0
 	{
 		do
 		{
 			datos_perfil(dperfil);
-		} while (limites(dperfil) == 0);
+		} while (limites_imaginario(dperfil) == 0);
 	}
 	else
 	{
@@ -1320,7 +1343,7 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 			do
 			{
 				datos_perfil(dperfil);
-			} while (limites(dperfil) == 0);
+			} while (limites_imaginario(dperfil) == 0);
 		}
 	}
 
@@ -1411,7 +1434,6 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 		for (i=0; i < Mi; i++)
 			yytau[i] = (float *) malloc(Mi * sizeof(float));
 
-
 		perfil_imaginario(dperfil);
 
 		meshgrid_imaginario(xxpr, yypr, tt, dperfil);
@@ -1424,7 +1446,7 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 
 		imprimir_flujo_perfil(xxtau, yytau, psipr);
 
-		plotfp(psipr);
+		plotfp(psipr, opf);
 	}
 
 	return 0;
