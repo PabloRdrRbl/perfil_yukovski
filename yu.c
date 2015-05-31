@@ -68,19 +68,19 @@ int datos_perfil(float * dperfil)
 	// El caso queda definido al pasar el vector por limites
 	dperfil[5] = 0; // Por ahora
 
-	//Futuros limites dinamicos del ploteo
+	//Futuros limites dinámicos del ploteo
 	dperfil[6] = dperfil[0] - dperfil[2] - 1; //-X ploteo circunferencia
 	dperfil[7] = dperfil[0] + dperfil[2] + 1; //+X ploteo circunferencia
 	dperfil[8] = dperfil[1] - dperfil[2] - 1; //-Y ploteo circunferencia
 	dperfil[9] = dperfil[1] + dperfil[2] + 1; //+Y ploteo circunferencia
 
-	//Radio'''?
+	// Radio
 	dperfil[14] = dperfil[2] * sqrt((pow(1 + dperfil[0],2) + pow(dperfil[1],2)));
 
 	return 0;
 }
 
-/* Funcion interpolada para  limites cuando --> x<1 && y<1 */
+/* Función interpolada para  límites cuando --> x<1 && y<1 */
 float f1(float x, float y) 
 {
 	float alim;
@@ -88,7 +88,7 @@ float f1(float x, float y)
 	return alim;
 }
 
-/* Funcion interpolada para  limites cuando --> x>1 && y<1 */
+/* Función interpolada para  límites cuando --> x>1 && y<1 */
 float f2(float x, float y) 
 {
 	float alim;
@@ -96,7 +96,7 @@ float f2(float x, float y)
 	return alim;
 }
 
-/* Funcion interpolada para  limites cuando --> x<1 && y>1 */
+/* Función interpolada para  límites cuando --> x<1 && y>1 */
 float f3 (float x, float y) 
 {
 	float alim;
@@ -104,7 +104,7 @@ float f3 (float x, float y)
 	return alim;
 }
 
-/* Funcion interpolada para  limites cuando --> x>1 && y>1 */
+/* Función interpolada para  límites cuando --> x>1 && y>1 */
 float f4(float x, float y)
 {
 	float alim;
@@ -744,7 +744,7 @@ int menu_flujo (float * opc, float * opp, float * opf)
 
 			if (lw > 2)
 			{
-				printf("\033[31m Te van a quedar lineas muy gruesas!");
+				printf("\033[31m ¡Te van a quedar lineas muy gruesas!");
 				printf("\033[0m\n");			
 			}
 
@@ -1034,7 +1034,7 @@ int plotfc (float *opf, float ** psi)
 	return 0;
 }
 
-/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Transformación de Yukovski en término de números complejos. Toma matriz NxN */
 int transformacion_yukovski_imaginario(float * dperfil, complex double * circunferencia_compleja)
 {
 	int i;
@@ -1077,6 +1077,7 @@ int imprimir_perfil_imaginario(double ** circunferenciapr)
 	return 0;
 }
 
+/* Crea e imprime el perfil alar usando números complejos */
 int perfil_imaginario(float * dperfil)
 {
 	int i;
@@ -1127,6 +1128,8 @@ int perfil_imaginario(float * dperfil)
 	return 0;
 }
 
+/* Crea las matrices que almacenan las coordenadas de la malla compleja. */
+/* Almacena en matrices de la misma dimensión que la malla MixMi */
 int meshgrid_imaginario(float ** xxpr, float ** yypr, complex double ** tt, float * dperfil)
 {
 	int i, j;
@@ -1163,6 +1166,7 @@ int meshgrid_imaginario(float ** xxpr, float ** yypr, complex double ** tt, floa
 	return(0);
 }	
 
+/* Calcula el flujo complejo del fluido en el cilindro */
 int calculo_flujo_imaginario(complex double ** tt, double ** psipr, float * dperfil)
 {
 	int i,j;
@@ -1182,6 +1186,7 @@ int calculo_flujo_imaginario(complex double ** tt, double ** psipr, float * dper
 	return 0;
 }
 
+/* Elimina de la malla los valores que distorsionan los resultados del flujo */ 
 int arregla_malla(complex double **tt, float * dperfil)
 {
 	complex double t0 = 0.2 + 0.3 * I;
@@ -1197,6 +1202,7 @@ int arregla_malla(complex double **tt, float * dperfil)
 	return 0;
 }
 
+/* Pasa de la malla compleja a una malla cartesiana */
 int nueva_malla (float **xxtau, float **yytau, complex double ** tt, float *dperfil)
 {
 	complex double tau;
@@ -1214,6 +1220,7 @@ int nueva_malla (float **xxtau, float **yytau, complex double ** tt, float *dper
 	return 0;
 }
 
+/* Transfiere a un archivo "pts_flujo_perfil.dat" los valores del flujo para cada parte de la malla */
 int imprimir_flujo_perfil(float **xxtau, float **yytau, double **psipr)
 {
 	FILE * matriz_archivo;
@@ -1236,6 +1243,7 @@ int imprimir_flujo_perfil(float **xxtau, float **yytau, double **psipr)
 	return 0;
 }
 
+/* Plotea el flujo en el prefil a través de GNU Plot */
 int plotfp (double **psipr, float *opf)
 {
 	int i, j;
@@ -1270,6 +1278,7 @@ int plotfp (double **psipr, float *opf)
 	return 1;
 }
 
+/* Límites para el cálculo del flujo complejo en el perfil */
 int limites_imaginario(float *dperfil)
 {
 	if (limites(dperfil)==0)
@@ -1292,6 +1301,7 @@ int limites_imaginario(float *dperfil)
 	return 1;
 }
 
+/* Función que encapsula los cálculos e impresiones del flujo complejo en cilindro y perfil */
 int flujo(float * dperfil, float * opc, float * opp, float * opf)
 {
 	int i;
