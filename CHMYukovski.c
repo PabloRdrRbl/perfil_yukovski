@@ -17,6 +17,7 @@ int menu_opciones (float * opc, float * opp, float * opf);
 // Con esto evitamos warnings por declaraciones implícitas en funciones que se llaman entre sí
 
 
+
 /*****************/
 /*** FUNCIONES ***/
 /*****************/
@@ -80,7 +81,7 @@ int datos_perfil(float * dperfil)
 	return 0;
 }
 
-/* Función interpolada para  límites cuando --> x<1 && y<1 */
+/* Función interpolada para límites cuando --> x<1 && y<1 */
 float f1(float x, float y) 
 {
 	float alim;
@@ -88,7 +89,7 @@ float f1(float x, float y)
 	return alim;
 }
 
-/* Función interpolada para  límites cuando --> x>1 && y<1 */
+/* Función interpolada para límites cuando --> x>1 && y<1 */
 float f2(float x, float y) 
 {
 	float alim;
@@ -96,7 +97,7 @@ float f2(float x, float y)
 	return alim;
 }
 
-/* Función interpolada para  límites cuando --> x<1 && y>1 */
+/* Función interpolada para límites cuando --> x<1 && y>1 */
 float f3 (float x, float y) 
 {
 	float alim;
@@ -104,7 +105,7 @@ float f3 (float x, float y)
 	return alim;
 }
 
-/* Función interpolada para  límites cuando --> x>1 && y>1 */
+/* Función interpolada para límites cuando --> x>1 && y>1 */
 float f4(float x, float y)
 {
 	float alim;
@@ -150,7 +151,7 @@ int limites(float * dperfil)
 		return 0;
 	}	
 
-	if (dperfil[0]==0) //CASO 2
+	if (dperfil[0]==0) // CASO 2
 	{
 		if (dperfil[2]==dperfil[1])
 		{
@@ -166,7 +167,7 @@ int limites(float * dperfil)
 		}	
 	}
  
-	if (dperfil[1]==0) //CASO 3
+	if (dperfil[1]==0) // CASO 3
 	{
 		if (dperfil[2]>dperfil[0])
 		{
@@ -182,7 +183,7 @@ int limites(float * dperfil)
 				return 0;	
 			}
 		}
-		else //Si a==xc o a<xc
+		else // Si a==xc o a<xc
 		{
 			printf("\033[31mValores no válidos (R<=Xc)"); 
 			printf("\033[0m\n");	
@@ -280,6 +281,9 @@ int matriz_circunferencia(float * dperfil, float ** circunferencia)
 		circunferencia[i][0] = dperfil[0] + dperfil[2] * cos(valores_t[i]);
 		circunferencia[i][1] = dperfil[1] + dperfil[2] * sin(valores_t[i]);
 	}
+
+	/* Liberación de la memoria*/
+	free(valores_t);
 
 	return 0;
 }
@@ -859,7 +863,13 @@ int perfil(float * dperfil, float * opc, float * opp, float * opf)
 	// Imprime el perfil con GNU Plot
 	plotp(dperfil, circunferencia, opp);
 
-	
+	/* Liberación de la memoria */
+	for (i=0; i < N; i++)
+	{
+		free(circunferencia[i]);
+	}
+	free(circunferencia);
+
 	return 0;
 }
 
@@ -933,6 +943,9 @@ int meshgrid(float ** xx, float ** yy, float *dperfil)
 		{
 			yy[i][j] = rango[i];
 		}
+
+	/* Liberación de la memoria */
+	free(rango);
 
 	return 0;
 }	
@@ -1153,6 +1166,13 @@ int perfil_imaginario(float * dperfil)
 	dperfil[17]=ejeymin;
 	dperfil[18]=ejeymax;
 
+	/* Liberación de la memoria */
+	for (i=0; i < N; i++)
+		free(circunferenciapr[i]);
+	free(circunferenciapr);
+	free(valores_t);
+	free(circunferencia_compleja);
+
 	return 0;
 }
 
@@ -1190,6 +1210,10 @@ int meshgrid_imaginario(float ** xxpr, float ** yypr, complex double ** tt, floa
 		{
 			tt[i][j] = xxpr[i][j]+yypr[i][j]*I;
 		}
+
+	/* Liberación de la memoria */
+	free(rangox);
+	free(rangoy);
 
 	return(0);
 }	
@@ -1434,6 +1458,21 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 		printf("\033[0m %f\n", fabsf(dflujo[4]));
 
 		plotfc(opf, psi);
+
+			/* Liberación de la memoria */
+		free(dflujo);
+		for (i=0; i < N; i++)
+			free(circunferencia[i]);
+		free(circunferencia);
+		for (i=0; i < M; i++)
+			free(xx[i]);
+		free(xx);
+		for (i=0; i < M; i++)
+			free(yy[i]);
+		free(yy);
+		for (i=0; i < M; i++)
+			free(psi[i]);
+		free(psi);
 	}
 
 	/* CAMBIAN */
@@ -1504,7 +1543,23 @@ int flujo(float * dperfil, float * opc, float * opp, float * opf)
 
 		if (plotfp(psipr, opf)==1)
 			return 1;
-	}
+
+		for (i=0; i < Mi; i++)
+				free(xxpr[i]);
+		free(xxpr);
+		for (i=0; i < Mi; i++)
+				free(yypr[i]);
+		free(yypr);
+		for (i=0; i < Mi; i++)
+				free(psipr[i]);
+		free(psipr);
+		for (i=0; i < Mi; i++)
+				free(xxtau[i]);
+		free(xxtau);
+		for (i=0; i < Mi; i++)
+				free(yytau[i]);
+		free(xxtau);
+	}	
 
 	return 0;
 }
@@ -1617,6 +1672,12 @@ int main(int argc, char const *argv[])
 
 		// Primera llamada al menú
 	 	menu(0 , dperfil, opc, opp, opf);
+
+	 	// Liberación de la memoria
+	 	free(dperfil);
+	 	free(opc);
+	 	free(opp);
+	 	free(opf);
 
 	  	return 0;
 	} 
