@@ -344,7 +344,9 @@ int plotc(float * dperfil, float * opc)
 
 	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n"); 
 	fprintf(pipec, "plot [%f:%f] [%f:%f] \"pts_circun.dat\" w filledcurves x1 fs pattern %.0f lc %.0f, \"pts_circun.dat\" pt %.0f ps %f lt %.0f\n", minx, maxx, miny, maxy,  opc[3], opc[4], opc[0], opc[1], opc[2]);
-	fprintf(pipec, "set term pngcairo \n set output \"circulo.png\" \n replot \n exit");
+	fprintf(pipec, "set term pngcairo \n set output \"circulo(%0.f).png\" \n replot \n exit", opc[5]);
+
+	opc[5] = opc[5]+1;
 
 	fflush(pipec);
 
@@ -464,7 +466,8 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
 
 	fprintf(pipep, "set size ratio 0.3 \n set nokey \n set xzeroaxis \n set yzeroaxis \n");
 	fprintf(pipep, "plot [%f:%f] [%f:%f] \"pts_perfil.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f, \"pts_perfil.dat\" pt %.0f ps %f lt %.0f\n", menorx, mayorx, menory, mayory, opp[3], opp[4], opp[0], opp[1], opp[2]);
-	fprintf(pipep, "set term pngcairo \n set output \"perfil.png\" \n replot \n exit");
+	fprintf(pipep, "set term pngcairo \n set output \"perfil(%0.f).png\" \n replot \n exit", opp[5]);
+	opp[5]=opp[5]+1;
 
 	fflush(pipep);
 
@@ -1030,6 +1033,8 @@ int plotfc (float *opf, float ** psi)
 
 	fprintf(pipefc, "set terminal push\n set terminal unknown\n set table 'temp.dat'\n set dgrid3d 31,31\n set view map\n unset surface\n set contour\n set cntrparam bspline\n set cntrparam levels incr %f,%f,%f\n splot 'pts_flujo_cilindro.dat' using 1:2:3 with lines\n unset table\n unset dgrid3d\n unset key\n set terminal pop\n", psimin, parte, psimax);
 	fprintf(pipefc, "set size ratio 1\n plot 'temp.dat' with lines lc %.0f lw %f, 'pts_circun.dat' with filledcurves x1 fs pattern 3 lc %.0f\n !rm temp.dat\n", opf[0], opf[1], opf[2]);
+	fprintf(pipefc, "set term pngcairo \n set output \"flujo-perfil(%0.f).png\" \n replot \n exit", opf[3]);
+	opf[3]=opf[3]+1;
 
 	fflush(pipefc);
 
@@ -1302,6 +1307,7 @@ int plotfp (double **psipr, float *opf)
 	FILE *pipefp = popen ("gnuplot -persistent","w"); 
 
 	fprintf(pipefp, "set terminal push \n set terminal unknown \n set table 'temp.dat' \n set view map \n set contour \n set cntrparam levels incr %f,%f,%f \n unset surface \n unset clabel \n splot 'pts_flujo_perfil.dat' with lines lc 3 \n unset table \n set terminal pop \n unset key \n set size ratio 0.3 \n plot 'temp.dat' with lines lc %0.f lw %f, 'pts_perfil_imaginario.dat' with filledcurves x1 fs pattern 3 lc %0.f\n !rm temp.dat\n", psiprmin, parte, psiprmax, opf[0], opf[1], opf[2]);
+	fprintf(pipefp, "set term pngcairo \n set output \"flujo-perfil(%0.f).png\" \n replot \n exit", opf[4]);
 
 	return 1;
 }
@@ -1591,29 +1597,33 @@ int main(int argc, char const *argv[])
 
 	 	// Opciones para la impresión de la circunferencia con GNU Plot
 		float * opc; 
-		opc = (float *) malloc(5 * sizeof(float)); //Reserva de memoria para el vector
+		opc = (float *) malloc(6 * sizeof(float)); //Reserva de memoria para el vector
 
-		opc[0] = 7;  // 1: (p)oint(t)ype   2: (p)oint(s)ize   3: (l)ine(t)ype    4:(pattern) malla     5:(l)ine(c)olor malla
+		opc[0] = 7;  // 1: (p)oint(t)ype   2: (p)oint(s)ize   3: (l)ine(t)ype    4:(pattern) malla     5:(l)ine(c)olor malla     6:numero de ploteo
 		opc[1] = 0.75;
 		opc[2] = 1;
 		opc[3] = 2;
 		opc[4] = 7;			
+		opc[5] = 1;
 
 		// Opciones para la impresión del perfil con GNU Plot
 		float * opp;	
-		opp = (float *) malloc(5 * sizeof(float)); 
-		opp[0] = 7;  // 1: (p)oint(t)ype   2: (p)oint(s)ize   3: (l)ine(t)ype    4:(pattern) malla     5:(l)ine(c)olor malla
+		opp = (float *) malloc(6 * sizeof(float)); 
+		opp[0] = 7;  // 1: (p)oint(t)ype   2: (p)oint(s)ize   3: (l)ine(t)ype    4:(pattern) malla     5:(l)ine(c)olor malla       6:numero de ploteo
 		opp[1] = 0.5;	
 		opp[2] = 1;	
 		opp[3] = 2;
 		opp[4] = 9; 
+		opp[5] = 1;
 		
 		// Opciones para la impresión del flujo
 		float * opf; 
-		opf = (float *) malloc(3 * sizeof(float));
-		opf[0] = 3;
+		opf = (float *) malloc(4 * sizeof(float));
+		opf[0] = 3; //1: color del flujo        2: tamaño de la linea de flujo       3: color del cilindro      4:numero ploteo cilindro       5:numero ploteo perfil
 		opf[1] = 1;
 		opf[2] = 9;
+		opc[3] = 1;
+		opc[4] = 1;
 
 		// Primera llamada al menú
 	 	menu(0 , dperfil, opc, opp, opf);

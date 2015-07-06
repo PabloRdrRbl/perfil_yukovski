@@ -362,6 +362,7 @@ int plotc(float * dperfil, float * opc)
 
 	fprintf(pipec, "set size square \n set nokey \n set xzeroaxis \n set yzeroaxis \n"); 
 	fprintf(pipec, "plot [%f:%f] [%f:%f] \"pts_circun.dat\" w filledcurves x1 fs pattern %.0f lc %.0f, \"pts_circun.dat\" pt %.0f ps %f lt %.0f\n", minx, maxx, miny, maxy,  opc[3], opc[4], opc[0], opc[1], opc[2]);
+	fprintf(pipec, "set term pngcairo \n set output \"circulo.png\" \n replot \n exit");
 
 	pclose (pipec);
 
@@ -483,6 +484,7 @@ int plotp (float * dperfil, float ** circunferencia, float * opp)
 
 	fprintf(pipep, "set size ratio 0.3 \n set nokey \n set xzeroaxis \n set yzeroaxis \n");
 	fprintf(pipep, "plot [%f:%f] [%f:%f] \"pts_perfil.dat\" w filledcurves x1 fs  pattern %.0f lc %.0f, \"pts_perfil.dat\" pt %.0f ps %f lt %.0f\n", menorx, mayorx, menory, mayory, opp[3], opp[4], opp[0], opp[1], opp[2]);
+	fprintf(pipep, "set term pngcairo \n set output \"perfil.png\" \n replot \n exit");
 
 	pclose (pipep);
 
