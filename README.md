@@ -5,7 +5,6 @@ CHMYukovski (churro modificado de Yukovski) permite realizar la transformación 
 Autores:
 * Delgado Marcos, Adrián
 * Lobato Pérez, Javier
-* Martínez Campo, Alberto
 * Rodríguez Robles, Pablo
 
 
